@@ -2679,6 +2679,10 @@
         const { data, error } = await db.from('candidats').insert([payload]).select();
         if (error) throw new Error(error.message || error.details || JSON.stringify(error));
         const id = data[0]?.id || '—';
+
+        // Sauvegarder les données pour l'impression
+        lastSubmittedCandidat = data[0];
+
         document.getElementById('cnum').textContent = `N° ${String(id).padStart(3, '0')} — ${concours_type}`;
         document.getElementById('sucScr').classList.add('show');
         document.getElementById('pfill').style.width = '100%';
@@ -2690,13 +2694,28 @@
     }
     function v(id) { return (document.getElementById(id)?.value || '').trim(); }
 
-    function printFiche() { document.getElementById('sucScr').classList.remove('show'); setTimeout(() => window.print(), 300); }
+    let lastSubmittedCandidat = null;
+
+    function printFiche() {
+      document.getElementById('sucScr').classList.remove('show');
+
+      // Si on a les données du candidat qui vient de s'inscrire, générer un PDF
+      if (lastSubmittedCandidat) {
+        setTimeout(() => {
+          genPDF([lastSubmittedCandidat], `ma_fiche_${lastSubmittedCandidat.nom}_${lastSubmittedCandidat.prenoms}.pdf`);
+        }, 300);
+      } else {
+        // Fallback: utiliser window.print() (pour desktop)
+        setTimeout(() => window.print(), 300);
+      }
+    }
 
     function resetForm() {
       document.getElementById('sucScr').classList.remove('show');
       document.querySelectorAll('#page-form input:not([readonly]),#page-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('#page-form select').forEach(el => el.selectedIndex = 0);
       photoB64 = '';
+      lastSubmittedCandidat = null; // Réinitialiser les données du candidat
       const img = document.getElementById('photoPreview'); img.style.display = 'none';
       document.querySelector('.pzone .pi').style.display = 'block';
       document.querySelector('.pzone .pt').style.display = 'block';

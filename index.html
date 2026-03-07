@@ -2539,12 +2539,26 @@
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Charger jsPDF de manière sécurisée
+    // Charger jsPDF de manière sécurisée avec retry
     let jsPDF = null;
-    if (window.jspdf && window.jspdf.jsPDF) {
-      jsPDF = window.jspdf.jsPDF;
-    } else {
-      console.warn('jsPDF non chargé - les exports PDF ne fonctionneront pas');
+
+    function initJsPDF() {
+      if (window.jspdf && window.jspdf.jsPDF) {
+        jsPDF = window.jspdf.jsPDF;
+        console.log('✅ jsPDF chargé avec succès');
+        return true;
+      }
+      return false;
+    }
+
+    // Essayer de charger immédiatement
+    if (!initJsPDF()) {
+      // Si pas encore chargé, attendre un peu et réessayer
+      setTimeout(() => {
+        if (!initJsPDF()) {
+          console.warn('⚠️ jsPDF non chargé après 1s');
+        }
+      }, 1000);
     }
 
     let concours_type = '', photoB64 = '';
@@ -2916,8 +2930,14 @@
     }
 
     function genPDF(cands, fname) {
-      if (!window.jspdf || !window.jspdf.jsPDF) {
+      // Réessayer de charger jsPDF si pas encore fait
+      if (!jsPDF) {
+        initJsPDF();
+      }
+
+      if (!jsPDF) {
         toast('❌ Erreur: jsPDF non chargé. Rechargez la page.');
+        console.error('jsPDF non disponible. Vérifiez votre connexion internet.');
         return;
       }
 

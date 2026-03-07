@@ -4,326 +4,574 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Miss & Mister — Cours Sonou</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* ===================== VARIABLES ===================== */
+/* ══════════════ VARIABLES ══════════════ */
 :root {
-  --gold:#C9A84C; --gold-l:#E8C97A; --gold-d:#9A7530;
-  --navy:#0D1B3E; --navy-m:#162350; --navy-l:#1E3060;
-  --cream:#FAF6EE; --white:#fff;
-  --miss:#c06090; --miss-l:#f0c0d8;
-  --mister:#4070c0; --mister-l:#c0d0f0;
-  --muted:#8892a4; --border:#e2ddd5;
-  --err:#e53e3e; --ok:#38a169;
-  --sidebar:260px;
+  --bg:       #0F1A14;
+  --bg2:      #141F18;
+  --card:     #1A2820;
+  --card2:    #1F3028;
+  --border:   rgba(255,255,255,.07);
+  --green:    #3DD68C;
+  --green-d:  #27A468;
+  --green-dim:#1D3D2A;
+  --gold:     #C9A84C;
+  --gold-l:   #F0D070;
+  --miss:     #E06090;
+  --miss-dim: #3A1828;
+  --mister:   #5090E0;
+  --mister-dim:#182038;
+  --text:     #F0F4F2;
+  --text2:    #8A9E94;
+  --text3:    #556660;
+  --radius:   16px;
+  --sidebar:  260px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;color:#1a1a2e}
-
-/* ===================== PAGES ===================== */
-.page{display:none;min-height:100vh}
-.page.active{display:block}
-#page-admin{display:none;background:#f0f2f7}
-#page-admin.active{display:flex}
-
-/* ===================== NAV TABS ===================== */
-.app-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:90;
-  background:var(--navy);border-top:1px solid rgba(201,168,76,0.25);
-  display:flex;
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:'Sora',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
 }
-.app-nav button{
-  flex:1;padding:10px 4px 12px;border:none;background:none;
-  color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;
-  font-size:11px;cursor:pointer;transition:all 0.2s;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
+
+/* ══════════════ SCROLLBAR ══════════════ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(61,214,140,.2);border-radius:4px}
+
+/* ══════════════ PAGES ══════════════ */
+.page { display:none; min-height:100vh; }
+.page.active { display:block; }
+#page-admin { display:none; background:var(--bg); }
+#page-admin.active { display:flex; }
+
+/* ══════════════ BOTTOM NAV ══════════════ */
+.app-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:90;
+  background:rgba(15,26,20,.96); backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex; padding-bottom:env(safe-area-inset-bottom);
 }
-.app-nav button .nav-ico{font-size:20px}
-.app-nav button.active{color:var(--gold-l)}
-.app-nav button.active .nav-ico{filter:drop-shadow(0 0 6px rgba(201,168,76,0.5))}
-
-/* ===================== PROGRESS ===================== */
-.pbar{height:3px;background:rgba(201,168,76,0.15);position:sticky;top:0;z-index:80}
-.pfill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold-l));transition:width .5s ease;width:0}
-
-/* ===================== FORM PAGE ===================== */
-.f-header{
-  background:linear-gradient(160deg,var(--navy) 0%,#1a2d5e 60%,var(--navy-m) 100%);
-  border-bottom:1px solid rgba(201,168,76,0.25);
-  padding:44px 20px 32px;text-align:center;position:relative;overflow:hidden;
+.app-nav button {
+  flex:1; padding:10px 4px 14px; border:none; background:none;
+  color:var(--text3); font-family:'Sora',sans-serif;
+  font-size:10px; font-weight:500; cursor:pointer;
+  transition:all .25s; display:flex; flex-direction:column;
+  align-items:center; gap:5px;
 }
-.f-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.f-header-deco{position:absolute;inset:0;background:repeating-linear-gradient(60deg,transparent,transparent 50px,rgba(201,168,76,0.02) 50px,rgba(201,168,76,0.02) 51px);pointer-events:none}
-.crown-row{display:flex;justify-content:center;gap:14px;margin-bottom:12px}
-.cr{font-size:38px;animation:float 3s ease-in-out infinite}
-.cr:last-child{animation-delay:.5s}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.f-header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,6vw,40px);color:var(--gold-l);font-weight:700;letter-spacing:2px;text-shadow:0 0 40px rgba(201,168,76,.3);line-height:1.1}
-.f-header .inst{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:4px;text-transform:uppercase;margin-top:7px;font-weight:300}
-.gdiv{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:12px auto 0}
+.app-nav button .ni { font-size:20px; transition:transform .25s; }
+.app-nav button.active { color:var(--green); }
+.app-nav button.active .ni { transform:scale(1.15); filter:drop-shadow(0 0 8px rgba(61,214,140,.4)); }
 
-/* TYPE CHOICE */
-.type-choice{display:flex;gap:10px;padding:20px 14px 0;max-width:760px;margin:0 auto}
-.tc-btn{flex:1;padding:14px 8px;border-radius:12px;border:2px solid rgba(201,168,76,.2);background:rgba(255,255,255,.04);cursor:pointer;transition:all .3s;text-align:center;color:rgba(255,255,255,.55);font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600}
-.tc-btn:hover{border-color:var(--gold-d);color:var(--gold-l)}
-.tc-btn.active{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold-l);box-shadow:0 0 20px rgba(201,168,76,.15)}
-.tc-btn .tci{font-size:26px;display:block;margin-bottom:5px}
+/* ══════════════ PROGRESS BAR ══════════════ */
+.pbar { height:2px; background:rgba(61,214,140,.1); position:sticky; top:0; z-index:80; }
+.pfill { height:100%; background:linear-gradient(90deg,var(--green-d),var(--green)); transition:width .5s ease; width:0; }
 
-/* FORM SECTIONS */
-.f-wrap{max-width:760px;margin:0 auto;padding:20px 14px 100px}
-.fsec{background:var(--cream);border-radius:14px;margin-bottom:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.22),0 0 0 1px rgba(201,168,76,.1);opacity:0;transform:translateY(14px);animation:rise .4s ease forwards}
-.fsec:nth-child(1){animation-delay:.05s}.fsec:nth-child(2){animation-delay:.1s}.fsec:nth-child(3){animation-delay:.15s}.fsec:nth-child(4){animation-delay:.2s}.fsec:nth-child(5){animation-delay:.25s}.fsec:nth-child(6){animation-delay:.3s}
-@keyframes rise{to{opacity:1;transform:translateY(0)}}
-.sh{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-m) 100%);padding:12px 18px;display:flex;align-items:center;gap:9px;border-bottom:2px solid var(--gold-d)}
-.sh .em{font-size:17px}.sh h2{font-family:'Cormorant Garamond',serif;color:var(--gold-l);font-size:16px;font-weight:600;letter-spacing:.5px}
-.sb{padding:18px;display:grid;gap:14px;grid-template-columns:1fr 1fr}
-.sb .full{grid-column:1/-1}
+/* ══════════════ FORM HEADER ══════════════ */
+.fhdr {
+  background:linear-gradient(160deg, #0B1510 0%, #121E18 50%, #0F1A14 100%);
+  padding:52px 24px 38px; text-align:center; position:relative; overflow:hidden;
+}
+.fhdr-glow { position:absolute; top:-80px; left:50%; transform:translateX(-50%); width:600px; height:300px; background:radial-gradient(ellipse, rgba(61,214,140,.1) 0%, transparent 65%); pointer-events:none; }
+.fhdr-line { position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(61,214,140,.3),transparent); }
+.crown-row { display:flex; justify-content:center; gap:14px; margin-bottom:18px; position:relative; z-index:1; }
+.cr { font-size:34px; animation:fl 3.5s ease-in-out infinite; filter:drop-shadow(0 4px 14px rgba(61,214,140,.25)); }
+.cr:nth-child(2) { animation-delay:.3s; font-size:44px; }
+.cr:nth-child(3) { animation-delay:.6s; }
+@keyframes fl { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+.fhdr-eyebrow { font-size:10px; letter-spacing:5px; text-transform:uppercase; color:var(--green); font-weight:600; margin-bottom:10px; position:relative; z-index:1; }
+.fhdr h1 { font-family:'DM Serif Display',serif; font-size:clamp(28px,7vw,52px); color:var(--text); font-weight:400; line-height:1.05; position:relative; z-index:1; }
+.fhdr h1 em { color:var(--green); font-style:italic; }
+.fhdr .sub { font-size:11px; color:var(--text3); letter-spacing:3px; text-transform:uppercase; margin-top:12px; position:relative; z-index:1; font-weight:400; }
 
-/* FIELDS */
-.fld{display:flex;flex-direction:column;gap:5px}
-.fld label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--navy);opacity:.7}
-.fld label .r{color:var(--gold-d)}
-.fld input,.fld select,.fld textarea{border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1a2e;background:#fff;transition:all .2s;outline:none;width:100%;-webkit-appearance:none}
-.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.12)}
-.fld input.inv{border-color:var(--err);box-shadow:0 0 0 3px rgba(229,62,62,.1)}
-.fld textarea{resize:vertical;min-height:84px}
-.dr{display:flex;align-items:center;gap:5px}
-.dr input{text-align:center}
-.dsep{color:var(--muted);font-weight:700;font-size:15px}
+/* ══════════════ TYPE CHOICE ══════════════ */
+.type-wrap { padding:24px 20px 0; max-width:720px; margin:0 auto; display:flex; gap:14px; }
+.tc {
+  flex:1; padding:20px 14px 18px; border-radius:var(--radius);
+  border:1.5px solid var(--border); background:var(--card);
+  cursor:pointer; transition:all .3s; text-align:center;
+  color:var(--text2); font-family:'Sora',sans-serif; font-size:15px; font-weight:600;
+  position:relative; overflow:hidden;
+}
+.tc-glow { position:absolute; inset:0; opacity:0; transition:opacity .3s; }
+.tc:hover { border-color:rgba(255,255,255,.15); color:var(--text); }
+.tc.active.miss-t { border-color:var(--miss); color:#fff; background:var(--miss-dim); box-shadow:0 0 28px rgba(224,96,144,.15); }
+.tc.active.mister-t { border-color:var(--mister); color:#fff; background:var(--mister-dim); box-shadow:0 0 28px rgba(80,144,224,.15); }
+.tc.active.miss-t .tc-glow { background:radial-gradient(circle at 50% 0%, rgba(224,96,144,.12) 0%, transparent 70%); opacity:1; }
+.tc.active.mister-t .tc-glow { background:radial-gradient(circle at 50% 0%, rgba(80,144,224,.12) 0%, transparent 70%); opacity:1; }
+.tc .tci { font-size:32px; display:block; margin-bottom:10px; position:relative; z-index:1; }
+.tc .tcl { position:relative; z-index:1; display:block; }
+.tc .tcs { font-size:10px; color:inherit; opacity:.55; font-weight:400; letter-spacing:.3px; display:block; margin-top:3px; position:relative; z-index:1; }
 
-/* PHOTO */
-.pzone{border:2px dashed rgba(154,117,48,.4);border-radius:12px;padding:24px 14px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(201,168,76,.03);position:relative;overflow:hidden}
-.pzone:hover{background:rgba(201,168,76,.07);border-color:var(--gold)}
-.pzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.pzone .pi{font-size:34px;margin-bottom:6px;display:block}
-.pzone p{font-size:11px;color:var(--muted);line-height:1.5}
-.pzone p strong{color:var(--gold-d)}
-#photoPreview{width:90px;height:108px;object-fit:cover;border-radius:8px;border:2px solid var(--gold);display:none;margin:8px auto 0}
+/* ══════════════ FORM WRAP ══════════════ */
+.fwrap { max-width:720px; margin:0 auto; padding:24px 20px 110px; }
 
-/* ENGAGEMENT */
-.el{list-style:none;display:flex;flex-direction:column;gap:8px}
-.el li{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;background:rgba(13,27,62,.04);border-radius:9px;border-left:3px solid var(--gold);font-size:13px;color:var(--navy);line-height:1.4}
-.el li::before{content:'✅';flex-shrink:0}
+/* ══════════════ SECTION CARD ══════════════ */
+.fsec {
+  background:var(--card); border-radius:var(--radius);
+  margin-bottom:14px; overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
+  opacity:0; transform:translateY(18px);
+  animation:rise .45s ease forwards;
+}
+.fsec:nth-child(1){animation-delay:.05s}
+.fsec:nth-child(2){animation-delay:.1s}
+.fsec:nth-child(3){animation-delay:.15s}
+.fsec:nth-child(4){animation-delay:.2s}
+.fsec:nth-child(5){animation-delay:.25s}
+@keyframes rise { to { opacity:1; transform:translateY(0); } }
+.sh {
+  padding:14px 20px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.sh .em { font-size:17px; }
+.sh h2 { font-size:13px; font-weight:600; color:var(--text); letter-spacing:.2px; }
+.sh-dot { width:6px; height:6px; border-radius:50%; background:var(--green); margin-left:auto; flex-shrink:0; box-shadow:0 0 8px rgba(61,214,140,.5); }
+.sbody { padding:20px; display:grid; gap:14px; grid-template-columns:1fr 1fr; }
+.sbody .full { grid-column:1/-1; }
 
-/* SIGNATURE */
-#sigCanvas{border:1.5px solid var(--border);border-radius:9px;background:#fff;cursor:crosshair;width:100%;display:block;touch-action:none}
-.sig-hint{font-size:11px;color:var(--muted);margin-top:4px}
-.btn-clr{background:none;border:1.5px solid var(--border);border-radius:7px;padding:5px 13px;font-size:12px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:7px}
-.btn-clr:hover{border-color:var(--err);color:var(--err)}
+/* ══════════════ FIELDS ══════════════ */
+.fld { display:flex; flex-direction:column; gap:6px; }
+.fld label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.2px; color:var(--text3); }
+.fld label .r { color:var(--green); }
+.fld input, .fld select, .fld textarea {
+  background:var(--bg2); border:1.5px solid var(--border);
+  border-radius:10px; padding:11px 14px;
+  font-family:'Sora',sans-serif; font-size:13px;
+  color:var(--text); outline:none; width:100%;
+  transition:border-color .2s, box-shadow .2s;
+  -webkit-appearance:none;
+}
+.fld input::placeholder, .fld textarea::placeholder { color:var(--text3); }
+.fld input:focus, .fld select:focus, .fld textarea:focus {
+  border-color:var(--green); box-shadow:0 0 0 3px rgba(61,214,140,.1);
+}
+.fld input.inv {
+  border-color:#E05050 !important;
+  box-shadow:0 0 0 3px rgba(224,80,80,.1) !important;
+  animation:shake .3s ease;
+}
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+.fld textarea { resize:vertical; min-height:90px; line-height:1.6; }
+.fld select {
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233DD68C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; padding-right:38px;
+}
+.fld select option { background:#1A2820; }
+.hint { font-size:10px; color:var(--text3); margin-top:1px; }
+.char-count { font-size:10px; color:var(--text3); text-align:right; margin-top:2px; transition:color .2s; }
+.char-count.ok { color:var(--green); }
+.char-count.warn { color:var(--gold); }
+.dr { display:flex; align-items:center; gap:7px; }
+.dr input { text-align:center; font-weight:600; font-size:15px; }
+.dsep { color:var(--text3); font-weight:700; font-size:17px; flex-shrink:0; }
 
-/* SUBMIT */
-.sub-area{text-align:center;padding:8px 18px 22px}
-.btn-sub{background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));color:var(--navy);border:none;border-radius:50px;padding:15px 50px;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s;box-shadow:0 6px 24px rgba(201,168,76,.28);width:100%;max-width:340px}
-.btn-sub:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(201,168,76,.42)}
-.btn-sub:disabled{opacity:.6;cursor:not-allowed;transform:none}
+/* ══════════════ PHOTO ══════════════ */
+.pzone {
+  border:1.5px dashed rgba(61,214,140,.25); border-radius:12px;
+  padding:28px 16px; text-align:center; cursor:pointer;
+  transition:all .3s; background:rgba(61,214,140,.02);
+  position:relative; overflow:hidden;
+}
+.pzone:hover { border-color:var(--green); background:rgba(61,214,140,.05); }
+.pzone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.pzone .pi { font-size:36px; display:block; margin-bottom:8px; }
+.pzone .pt { font-size:11.5px; color:var(--text3); line-height:1.7; }
+.pzone .pt strong { color:var(--green); font-weight:600; }
+#photoPreview {
+  width:96px; height:116px; object-fit:cover;
+  border-radius:10px; border:2px solid var(--green);
+  display:none; margin:10px auto 0;
+  box-shadow:0 4px 20px rgba(61,214,140,.2);
+}
 
-/* SUCCESS */
-.suc-scr{display:none;position:fixed;inset:0;background:var(--navy);z-index:200;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background-image:radial-gradient(ellipse at center,rgba(201,168,76,.08) 0%,transparent 60%)}
-.suc-scr.show{display:flex}
-.suc-scr .bc{font-size:72px;animation:float 2s ease-in-out infinite}
-.suc-scr h2{font-family:'Cormorant Garamond',serif;color:var(--gold-l);font-size:34px;margin:14px 0 8px}
-.suc-scr p{color:rgba(255,255,255,.6);font-size:13px;max-width:360px;line-height:1.7}
-.cnum{background:rgba(201,168,76,.15);border:1px solid var(--gold);border-radius:10px;padding:10px 26px;margin:18px 0;font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold-l);letter-spacing:2px}
-.sbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:280px}
-.btn-g{background:var(--gold);color:var(--navy);border:none;border-radius:9px;padding:12px 22px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s}
-.btn-g:hover{background:var(--gold-l)}
-.btn-o{background:transparent;border:1.5px solid rgba(201,168,76,.4);border-radius:9px;padding:11px 22px;color:rgba(255,255,255,.65);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
-.btn-o:hover{border-color:var(--gold);color:var(--gold-l)}
+/* ══════════════ ENGAGEMENT LIST ══════════════ */
+.el { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.el li {
+  display:flex; align-items:flex-start; gap:11px;
+  padding:11px 14px; background:rgba(61,214,140,.04);
+  border-radius:10px; border-left:3px solid var(--green);
+  font-size:12.5px; color:var(--text2); line-height:1.55;
+}
+.el li::before { content:'✓'; color:var(--green); font-weight:700; font-size:13px; flex-shrink:0; margin-top:1px; }
 
-/* ===================== ADMIN PAGE ===================== */
-.sidebar{width:var(--sidebar);background:linear-gradient(180deg,var(--navy) 0%,var(--navy-m) 100%);min-height:100vh;flex-shrink:0;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .3s}
-.sidebar.open{transform:translateX(0)}
-@media(min-width:900px){.sidebar{transform:translateX(0)}.main{margin-left:var(--sidebar)}}
-.sl{padding:26px 18px 18px;text-align:center;border-bottom:1px solid rgba(201,168,76,.18)}
-.sl .lc{font-size:30px}.sl h2{font-family:'Cormorant Garamond',serif;color:var(--gold-l);font-size:14px;font-weight:700;letter-spacing:1px;margin-top:5px;line-height:1.3}
-.sl p{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:2px}
-.ns{padding:14px 10px 6px}
-.nl{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:0 7px;margin-bottom:5px}
-.nb{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;transition:all .2s;width:100%;border:none;background:none;font-family:'DM Sans',sans-serif;text-align:left}
-.nb:hover{background:rgba(255,255,255,.07);color:#fff}
-.nb.active{background:rgba(201,168,76,.15);color:var(--gold-l)}
-.nb .ni{font-size:15px;width:18px;text-align:center}
-.sst{margin-top:auto;padding:14px;border-top:1px solid rgba(201,168,76,.12)}
-.ssm{text-align:center;padding:9px;background:rgba(255,255,255,.04);border-radius:9px;margin-bottom:7px}
-.ssm .sv{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold-l);font-weight:700}
-.ssm .sl2{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1px}
-.sr{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.sm .sv{color:var(--miss-l)}.smr .sv{color:var(--mister-l)}
+/* ══════════════ SUBMIT ══════════════ */
+.sub-area { padding:10px 20px 28px; text-align:center; }
+.btn-sub {
+  background:var(--green); color:#0A1510;
+  border:none; border-radius:50px;
+  padding:16px 52px; font-family:'Sora',sans-serif;
+  font-size:14px; font-weight:700; letter-spacing:.5px;
+  cursor:pointer; transition:all .3s;
+  box-shadow:0 6px 28px rgba(61,214,140,.3);
+  width:100%; max-width:380px;
+  position:relative; overflow:hidden;
+}
+.btn-sub::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0); transition:background .2s; }
+.btn-sub:hover { background:var(--green-d); transform:translateY(-2px); box-shadow:0 12px 36px rgba(61,214,140,.4); }
+.btn-sub:active { transform:translateY(0); }
+.btn-sub:disabled { opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
 
-/* MAIN ADMIN */
-.main{flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:40;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.topbar h1{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--navy);font-weight:700}
-.topbar .sp{flex:1}
-.sb2{background:#f0f2f7;border:1.5px solid var(--border);border-radius:50px;padding:8px 16px;display:flex;align-items:center;gap:7px;width:240px;transition:all .2s}
-.sb2:focus-within{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
-.sb2 input{border:none;outline:none;background:transparent;font-size:13px;width:100%;font-family:'DM Sans',sans-serif}
-.mnu-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--navy)}
-.acontent{padding:20px 22px;flex:1}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.sc{background:#fff;border-radius:12px;padding:16px 18px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.sc .sv{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--navy);line-height:1}
-.sc .sl2{font-size:11px;color:var(--muted);margin-top:3px}
-.sc.miss .sv{color:var(--miss)}.sc.mister .sv{color:var(--mister)}.sc.gold .sv{color:var(--gold-d)}
-.ebar{display:flex;gap:9px;align-items:center;background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:18px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);flex-wrap:wrap}
-.pills{display:flex;gap:7px;flex-wrap:wrap}
-.pill{padding:6px 14px;border-radius:50px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all .2s;white-space:nowrap}
-.pill:hover{border-color:var(--gold-d);color:var(--navy)}
-.pill.active{background:var(--navy);color:var(--gold-l);border-color:var(--navy)}
-.pill.miss.active{background:var(--miss);color:#fff;border-color:var(--miss)}
-.pill.mister.active{background:var(--mister);color:#fff;border-color:var(--mister)}
-.esp{flex:1;font-size:12px;color:var(--muted)}
-.btn-exp{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
-.btn-exp:hover{background:var(--navy-l)}
-.btn-exp.gld{background:var(--gold-d);color:var(--navy)}.btn-exp.gld:hover{background:var(--gold)}
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.cc{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.cc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:var(--gold-d)}
-.cp{height:150px;background:linear-gradient(135deg,var(--navy),var(--navy-m));display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
-.cp img{width:100%;height:100%;object-fit:cover}
-.cb{position:absolute;top:7px;right:7px;padding:2px 9px;border-radius:50px;font-size:9px;font-weight:700;letter-spacing:.5px}
-.cb-m{background:var(--miss);color:#fff}.cb-mr{background:var(--mister);color:#fff}
-.ci{padding:10px 13px}
-.cn{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:1px;margin-bottom:2px}
-.cname{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--navy);line-height:1.2}
-.csub{font-size:10px;color:var(--muted);margin-top:2px}
-.cacts{display:flex;gap:5px;padding:0 13px 11px}
-.ab{flex:1;padding:5px;border-radius:7px;border:1px solid var(--border);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;color:var(--navy);transition:all .2s;text-align:center}
-.ab:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
-.ab.del:hover{background:var(--err);border-color:var(--err);color:#fff}
-.empty-s{text-align:center;padding:56px 20px;color:var(--muted)}
-.empty-s .ee{font-size:52px;margin-bottom:10px;opacity:.45}
-.ldr{text-align:center;padding:56px;color:var(--muted);font-size:13px}
-.spin{display:inline-block;animation:sp 1s linear infinite;font-size:26px}
-@keyframes sp{to{transform:rotate(360deg)}}
+/* ══════════════ SUCCESS ══════════════ */
+.suc-scr {
+  display:none; position:fixed; inset:0;
+  background:var(--bg); z-index:200;
+  flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:32px;
+}
+.suc-scr.show { display:flex; }
+.suc-glow { position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); width:400px; height:400px; background:radial-gradient(circle, rgba(61,214,140,.12) 0%, transparent 65%); pointer-events:none; }
+.suc-scr .bc { font-size:80px; animation:fl 2s ease-in-out infinite; filter:drop-shadow(0 8px 24px rgba(61,214,140,.4)); position:relative; z-index:1; }
+.suc-scr h2 { font-family:'DM Serif Display',serif; color:var(--text); font-size:34px; font-weight:400; margin:18px 0 8px; position:relative; z-index:1; }
+.suc-scr p { color:var(--text2); font-size:13px; max-width:340px; line-height:1.8; position:relative; z-index:1; }
+.cnum { background:rgba(61,214,140,.1); border:1px solid rgba(61,214,140,.3); border-radius:12px; padding:10px 28px; margin:20px 0; font-size:17px; color:var(--green); letter-spacing:3px; font-weight:700; position:relative; z-index:1; }
+.sbtns { display:flex; flex-direction:column; gap:10px; width:100%; max-width:290px; position:relative; z-index:1; }
+.btn-g { background:var(--green); color:#0A1510; border:none; border-radius:10px; padding:13px 24px; font-family:'Sora',sans-serif; font-weight:700; font-size:13px; cursor:pointer; transition:all .2s; }
+.btn-g:hover { background:var(--green-d); }
+.btn-o { background:transparent; border:1px solid var(--border); border-radius:10px; padding:12px 24px; color:var(--text3); font-family:'Sora',sans-serif; font-size:12.5px; cursor:pointer; transition:all .2s; }
+.btn-o:hover { border-color:var(--green); color:var(--green); }
 
-/* MODAL */
-.mov{display:none;position:fixed;inset:0;background:rgba(13,27,62,.7);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:16px}
-.mov.show{display:flex}
-.mod{background:#fff;border-radius:16px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);animation:mi .3s cubic-bezier(.4,0,.2,1)}
-@keyframes mi{from{transform:scale(.94) translateY(14px);opacity:0}}
-.mhd{background:linear-gradient(135deg,var(--navy),var(--navy-m));padding:18px 22px;display:flex;align-items:center;gap:14px;border-radius:16px 16px 0 0;border-bottom:2px solid var(--gold-d)}
-.mph{width:64px;height:76px;border-radius:8px;object-fit:cover;border:2px solid var(--gold);flex-shrink:0;background:var(--navy-l);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
-.mph img{width:100%;height:100%;object-fit:cover}
-.mt h3{font-family:'Cormorant Garamond',serif;color:var(--gold-l);font-size:19px;font-weight:700}
-.mt p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
-.mclose{margin-left:auto;background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:rgba(255,255,255,.65);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.mclose:hover{background:rgba(255,255,255,.2);color:#fff}
-.mbd{padding:18px 22px}
-.msec{margin-bottom:18px}
-.msec h4{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold-d);font-weight:700;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--border)}
-.ig{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.ii .il{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.ii .iv{font-size:13px;color:var(--navy);font-weight:500;margin-top:2px}
-.ii.full{grid-column:1/-1}
-.msig{max-width:260px;border:1px solid var(--border);border-radius:8px;margin-top:5px}
-.macts{display:flex;gap:9px;padding:14px 22px;border-top:1px solid var(--border)}
-.btn-nv{background:var(--navy);color:var(--gold-l);border:none;border-radius:9px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-nv:hover{background:var(--navy-l)}
-.btn-gs{background:var(--gold);color:var(--navy);border:none;border-radius:9px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-gs:hover{background:var(--gold-l)}
+/* ══════════════════════════════════════
+   ADMIN PAGE
+══════════════════════════════════════ */
+.sidebar {
+  width:var(--sidebar); background:var(--bg2);
+  border-right:1px solid var(--border);
+  min-height:100vh; flex-shrink:0;
+  display:flex; flex-direction:column;
+  position:fixed; left:0; top:0; bottom:0; z-index:50;
+  transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.open { transform:translateX(0); }
+@media(min-width:900px) { .sidebar{transform:translateX(0)} .amain{margin-left:var(--sidebar)} }
 
-/* CONFIRM */
-.cov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
-.cov.show{display:flex}
-.cbox{background:#fff;border-radius:14px;padding:26px 26px 18px;max-width:340px;width:90%;box-shadow:0 16px 48px rgba(0,0,0,.2);text-align:center}
-.cbox h3{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--navy);margin-bottom:9px}
-.cbox p{font-size:12px;color:var(--muted);margin-bottom:18px}
-.cbtns{display:flex;gap:9px}
-.btn-can{flex:1;background:var(--border);color:var(--navy);border:none;border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer}
-.btn-del{flex:1;background:var(--err);color:#fff;border:none;border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer}
+.sl { padding:26px 20px 20px; border-bottom:1px solid var(--border); }
+.sl-brand { display:flex; align-items:center; gap:10px; }
+.sl-ico { width:38px; height:38px; background:linear-gradient(135deg,var(--green-d),var(--green)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; box-shadow:0 4px 14px rgba(61,214,140,.3); }
+.sl-name { font-size:13.5px; font-weight:700; color:var(--text); }
+.sl-sub { font-size:9.5px; color:var(--text3); letter-spacing:.5px; margin-top:1px; }
 
-/* TOAST */
-.tst{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--navy);color:#fff;padding:11px 20px;border-radius:50px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);border:1px solid rgba(201,168,76,.3);transition:all .3s;z-index:300;white-space:nowrap;opacity:0}
-.tst.show{transform:translateX(-50%) translateY(0);opacity:1}
-@media(min-width:900px){.tst{bottom:24px;left:auto;right:24px;transform:translateY(60px)}.tst.show{transform:translateY(0)}}
+.ns { padding:14px 12px 6px; }
+.nl { font-size:9px; text-transform:uppercase; letter-spacing:2.5px; color:var(--text3); padding:0 8px; margin-bottom:6px; font-weight:600; }
+.nb {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px;
+  cursor:pointer; color:var(--text3);
+  font-size:12.5px; font-weight:500;
+  transition:all .2s; width:100%; border:none;
+  background:none; font-family:'Sora',sans-serif; text-align:left;
+}
+.nb:hover { background:rgba(255,255,255,.05); color:var(--text); }
+.nb.active { background:rgba(61,214,140,.1); color:var(--green); }
+.nb .ni { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
 
-/* RESPONSIVE */
-@media(max-width:700px){
+.sst { margin-top:auto; padding:16px; border-top:1px solid var(--border); }
+.stat-pill { background:var(--card); border-radius:12px; padding:14px 16px; margin-bottom:8px; border:1px solid var(--border); }
+.stat-pill .sv { font-size:30px; font-weight:800; color:var(--text); line-height:1; }
+.stat-pill .sl2 { font-size:9px; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; font-weight:500; }
+.stat-miss .sv { color:var(--miss); }
+.stat-mister .sv { color:var(--mister); }
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+
+/* ══════ MAIN ADMIN ══════ */
+.amain { flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar {
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:14px 24px; display:flex; align-items:center;
+  gap:14px; position:sticky; top:0; z-index:40;
+}
+.topbar h1 { font-size:17px; font-weight:700; color:var(--text); }
+.topbar .sp { flex:1; }
+.sbar {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:50px; padding:9px 16px;
+  display:flex; align-items:center; gap:8px; width:240px;
+  transition:all .2s;
+}
+.sbar:focus-within { border-color:var(--green); box-shadow:0 0 0 3px rgba(61,214,140,.1); }
+.sbar input { border:none; outline:none; background:transparent; font-size:12.5px; width:100%; color:var(--text); font-family:'Sora',sans-serif; }
+.sbar input::placeholder { color:var(--text3); }
+.mnu-btn { background:var(--card); border:1px solid var(--border); border-radius:9px; width:38px; height:38px; cursor:pointer; color:var(--text2); font-size:16px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.mnu-btn:hover { background:rgba(61,214,140,.1); color:var(--green); }
+
+/* ══════ STATS ══════ */
+.acontent { padding:22px 24px; flex:1; }
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+.sc {
+  background:var(--card); border-radius:var(--radius);
+  padding:18px 20px; border:1px solid var(--border);
+  position:relative; overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+}
+.sc:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.2); }
+.sc-glow { position:absolute; top:-30px; right:-30px; width:100px; height:100px; border-radius:50%; opacity:.06; }
+.sc-icon { font-size:22px; margin-bottom:10px; }
+.sc .sv { font-size:36px; font-weight:800; color:var(--text); line-height:1; }
+.sc .sl2 { font-size:10.5px; color:var(--text3); margin-top:5px; font-weight:500; }
+.sc.green-s .sc-glow { background:var(--green); }
+.sc.green-s .sv { color:var(--green); }
+.sc.miss-s .sc-glow { background:var(--miss); }
+.sc.miss-s .sv { color:var(--miss); }
+.sc.mister-s .sc-glow { background:var(--mister); }
+.sc.mister-s .sv { color:var(--mister); }
+
+/* ══════ EXPORT BAR ══════ */
+.ebar {
+  display:flex; gap:10px; align-items:center;
+  background:var(--card); border-radius:var(--radius);
+  padding:14px 18px; margin-bottom:18px;
+  border:1px solid var(--border); flex-wrap:wrap;
+}
+.pills { display:flex; gap:7px; flex-wrap:wrap; }
+.pill {
+  padding:7px 15px; border-radius:50px;
+  font-size:11px; font-weight:600; cursor:pointer;
+  border:1px solid var(--border); background:transparent;
+  color:var(--text3); transition:all .2s; font-family:'Sora',sans-serif;
+}
+.pill:hover { border-color:rgba(255,255,255,.2); color:var(--text); }
+.pill.active { background:rgba(61,214,140,.15); color:var(--green); border-color:rgba(61,214,140,.3); }
+.pill.miss.active { background:rgba(224,96,144,.15); color:var(--miss); border-color:rgba(224,96,144,.3); }
+.pill.mister.active { background:rgba(80,144,224,.15); color:var(--mister); border-color:rgba(80,144,224,.3); }
+.esp { flex:1; font-size:11px; color:var(--text3); }
+.exp-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-exp {
+  border:none; border-radius:9px; padding:8px 15px;
+  font-family:'Sora',sans-serif; font-size:11px; font-weight:600;
+  cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:5px;
+}
+.btn-exp.emiss { background:rgba(224,96,144,.15); color:var(--miss); border:1px solid rgba(224,96,144,.25); }
+.btn-exp.emiss:hover { background:var(--miss); color:#fff; }
+.btn-exp.emister { background:rgba(80,144,224,.15); color:var(--mister); border:1px solid rgba(80,144,224,.25); }
+.btn-exp.emister:hover { background:var(--mister); color:#fff; }
+.btn-exp.eall { background:rgba(61,214,140,.15); color:var(--green); border:1px solid rgba(61,214,140,.25); }
+.btn-exp.eall:hover { background:var(--green); color:#0A1510; }
+
+/* ══════ CANDIDATE GRID ══════ */
+.cgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+.cc {
+  background:var(--card); border-radius:var(--radius);
+  border:1px solid var(--border); overflow:hidden;
+  cursor:pointer; transition:all .28s;
+}
+.cc:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,.3); border-color:rgba(61,214,140,.25); }
+.cp { height:150px; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:50px; position:relative; overflow:hidden; }
+.cp img { width:100%; height:100%; object-fit:cover; }
+.cbdg { position:absolute; top:9px; right:9px; padding:3px 10px; border-radius:50px; font-size:9px; font-weight:700; letter-spacing:.3px; backdrop-filter:blur(10px); }
+.bdg-m { background:rgba(224,96,144,.85); color:#fff; }
+.bdg-mr { background:rgba(80,144,224,.85); color:#fff; }
+.cinfo { padding:13px 14px 10px; }
+.cnum2 { font-size:9px; color:var(--text3); font-weight:600; letter-spacing:1.5px; margin-bottom:3px; text-transform:uppercase; }
+.cname { font-size:14px; font-weight:700; color:var(--text); line-height:1.25; }
+.csub { font-size:11px; color:var(--text3); margin-top:3px; }
+.cacts { display:flex; gap:5px; padding:0 14px 13px; }
+.ab { flex:1; padding:6px 4px; border-radius:8px; border:1px solid var(--border); font-size:10.5px; cursor:pointer; font-family:'Sora',sans-serif; background:transparent; color:var(--text3); transition:all .2s; text-align:center; font-weight:500; }
+.ab:hover { background:rgba(61,214,140,.1); color:var(--green); border-color:rgba(61,214,140,.3); }
+.ab.del:hover { background:rgba(224,80,80,.1); color:#E05050; border-color:rgba(224,80,80,.3); }
+.ab.edit:hover { background:rgba(240,208,112,.1); color:var(--gold-l); border-color:rgba(240,208,112,.3); }
+/* ══════ EDIT MODAL ══════ */
+.edit-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(8px); z-index:150; align-items:center; justify-content:center; padding:16px; }
+.edit-ov.show { display:flex; }
+.edit-box { background:var(--card); border-radius:20px; max-width:720px; width:100%; max-height:92vh; overflow-y:auto; border:1px solid var(--border); box-shadow:0 32px 80px rgba(0,0,0,.5); animation:mi .3s ease; }
+.edit-hd { padding:18px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); z-index:5; border-radius:20px 20px 0 0; }
+.edit-hd h3 { font-size:16px; font-weight:700; color:var(--text); }
+.edit-body { padding:22px 24px; display:grid; gap:14px; grid-template-columns:1fr 1fr; }
+.edit-body .full { grid-column:1/-1; }
+.edit-sec { grid-column:1/-1; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--green); font-weight:700; padding-bottom:6px; border-bottom:1px solid var(--border); margin-top:6px; }
+.edit-ftr { display:flex; gap:10px; padding:15px 24px; border-top:1px solid var(--border); background:rgba(0,0,0,.15); border-radius:0 0 20px 20px; }
+.btn-save { background:var(--green); color:#0A1510; border:none; border-radius:10px; padding:11px 24px; font-family:'Sora',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-save:hover { background:var(--green-d); }
+.btn-save:disabled { opacity:.5; cursor:not-allowed; }
+
+/* ══════ EMPTY / LOADER ══════ */
+.empty-s { text-align:center; padding:60px 20px; color:var(--text3); }
+.empty-s .ee { font-size:52px; margin-bottom:12px; opacity:.3; }
+.empty-s p { font-size:13px; line-height:1.7; }
+.ldr { text-align:center; padding:60px; color:var(--text3); font-size:13px; }
+.spin { display:inline-block; animation:sp 1s linear infinite; font-size:28px; }
+@keyframes sp { to { transform:rotate(360deg); } }
+
+/* ══════ MODAL FICHE ══════ */
+.mov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(8px); z-index:100; align-items:center; justify-content:center; padding:16px; }
+.mov.show { display:flex; }
+.mod { background:var(--card); border-radius:20px; max-width:660px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); box-shadow:0 32px 80px rgba(0,0,0,.5); animation:mi .3s cubic-bezier(.4,0,.2,1); }
+@keyframes mi { from { transform:scale(.93) translateY(20px); opacity:0; } }
+.mhd { padding:20px 24px; display:flex; align-items:center; gap:16px; border-bottom:1px solid var(--border); }
+.mph { width:62px; height:74px; border-radius:10px; flex-shrink:0; border:1.5px solid rgba(61,214,140,.4); background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; }
+.mph img { width:100%; height:100%; object-fit:cover; }
+.mt h3 { font-size:18px; font-weight:700; color:var(--text); }
+.mt p { font-size:11px; color:var(--text3); margin-top:3px; }
+.mclose { margin-left:auto; background:rgba(255,255,255,.06); border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; color:var(--text3); font-size:14px; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+.mclose:hover { background:rgba(255,255,255,.12); color:var(--text); }
+.mbd { padding:20px 24px; }
+.msec { margin-bottom:18px; }
+.msec h4 { font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--green); font-weight:600; margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--border); }
+.ig { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ii .il { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:500; }
+.ii .iv { font-size:13px; color:var(--text); font-weight:500; margin-top:3px; }
+.ii.full { grid-column:1/-1; }
+.macts2 { display:flex; gap:10px; padding:15px 24px; border-top:1px solid var(--border); background:rgba(0,0,0,.15); border-radius:0 0 20px 20px; }
+.btn-nv { background:rgba(255,255,255,.07); color:var(--text2); border:1px solid var(--border); border-radius:10px; padding:11px 22px; font-family:'Sora',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-nv:hover { background:rgba(255,255,255,.1); }
+.btn-gs { background:var(--green); color:#0A1510; border:none; border-radius:10px; padding:11px 22px; font-family:'Sora',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-gs:hover { background:var(--green-d); }
+
+/* ══════ CONFIRM DELETE ══════ */
+.cov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+.cov.show { display:flex; }
+.cbox { background:var(--card); border-radius:18px; padding:28px 28px 22px; max-width:360px; width:90%; border:1px solid var(--border); box-shadow:0 24px 64px rgba(0,0,0,.4); text-align:center; }
+.cbox .cico { font-size:42px; margin-bottom:12px; }
+.cbox h3 { font-size:20px; font-weight:700; color:var(--text); margin-bottom:7px; }
+.cbox p { font-size:12px; color:var(--text3); margin-bottom:22px; line-height:1.6; }
+.cbtns { display:flex; gap:10px; }
+.btn-can { flex:1; background:rgba(255,255,255,.06); color:var(--text2); border:1px solid var(--border); border-radius:10px; padding:12px; font-family:'Sora',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-can:hover { background:rgba(255,255,255,.1); }
+.btn-del { flex:1; background:#3D1010; color:#E05050; border:1px solid rgba(224,80,80,.3); border-radius:10px; padding:12px; font-family:'Sora',sans-serif; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-del:hover { background:#E05050; color:#fff; }
+
+/* ══════ LOGIN MODAL ══════ */
+.login-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:250; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+.login-modal.show { display:flex; }
+.login-box { background:var(--card); border-radius:20px; padding:36px 32px 28px; max-width:380px; width:90%; border:1px solid var(--border); box-shadow:0 28px 80px rgba(0,0,0,.4); text-align:center; animation:mi .3s ease; position:relative; overflow:hidden; }
+.login-glow { position:absolute; top:-60px; left:50%; transform:translateX(-50%); width:280px; height:200px; background:radial-gradient(ellipse, rgba(61,214,140,.08) 0%, transparent 65%); pointer-events:none; }
+.login-box .lico { font-size:50px; margin-bottom:12px; display:block; position:relative; z-index:1; filter:drop-shadow(0 4px 16px rgba(61,214,140,.3)); }
+.login-box h3 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:6px; position:relative; z-index:1; }
+.login-box p { font-size:12px; color:var(--text3); margin-bottom:22px; line-height:1.6; position:relative; z-index:1; }
+.pwd-wrap { position:relative; margin-bottom:10px; }
+.pwd-wrap input { width:100%; padding:13px 44px 13px 16px; background:var(--bg2); border:1.5px solid var(--border); border-radius:12px; font-family:'Sora',sans-serif; font-size:14px; color:var(--text); outline:none; transition:border-color .2s; }
+.pwd-wrap input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(61,214,140,.1); }
+.pwd-wrap input::placeholder { color:var(--text3); }
+.pwd-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:17px; color:var(--text3); transition:color .2s; }
+.pwd-toggle:hover { color:var(--green); }
+.login-err { color:#E05050; font-size:11.5px; margin-bottom:12px; display:none; padding:8px 12px; background:rgba(224,80,80,.1); border-radius:8px; border:1px solid rgba(224,80,80,.2); }
+.login-btns { display:flex; gap:10px; }
+.btn-login { flex:1; background:var(--green); color:#0A1510; border:none; border-radius:11px; padding:13px; font-family:'Sora',sans-serif; font-weight:700; font-size:13px; cursor:pointer; transition:all .2s; box-shadow:0 4px 16px rgba(61,214,140,.25); }
+.btn-login:hover { background:var(--green-d); }
+.btn-login-can { flex:1; background:rgba(255,255,255,.06); color:var(--text3); border:1px solid var(--border); border-radius:11px; padding:13px; font-family:'Sora',sans-serif; font-weight:600; font-size:13px; cursor:pointer; transition:all .2s; }
+.btn-login-can:hover { background:rgba(255,255,255,.1); color:var(--text); }
+
+/* ══════ TOAST ══════ */
+.tst {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(16px);
+  background:var(--card2); color:var(--text); padding:11px 20px; border-radius:50px;
+  font-size:12px; font-weight:500; border:1px solid var(--border);
+  box-shadow:0 8px 28px rgba(0,0,0,.4); transition:all .35s cubic-bezier(.4,0,.2,1);
+  z-index:400; white-space:nowrap; opacity:0; pointer-events:none; backdrop-filter:blur(10px);
+}
+.tst.show { transform:translateX(-50%) translateY(0); opacity:1; }
+@media(min-width:900px) { .tst{bottom:24px;left:auto;right:24px;transform:translateY(16px)} .tst.show{transform:translateY(0)} }
+
+/* ══════ RESPONSIVE ══════ */
+@media(max-width:700px) {
   .stats-row{grid-template-columns:1fr 1fr}
-  .acontent{padding:14px}
-  .topbar{padding:10px 14px}
-  .sb2{width:100%}
+  .sbody{grid-template-columns:1fr}
+  .acontent{padding:14px 14px}
+  .topbar{padding:11px 14px}
+  .sbar{width:100%}
   .ig{grid-template-columns:1fr}
-  .sb{grid-template-columns:1fr}
+  .exp-btns{width:100%}
+  .btn-exp{flex:1;justify-content:center}
 }
-@media(max-width:480px){
-  .stats-row{grid-template-columns:1fr 1fr}
-}
+#choosePrompt { text-align:center; padding:40px 20px 110px; color:var(--text3); font-size:13px; font-style:italic; }
 </style>
 </head>
 <body>
 
-<!-- ============================================================ -->
-<!--  PAGE FORMULAIRE                                             -->
-<!-- ============================================================ -->
+<!-- ═══════════════════════════ FORM PAGE ═══ -->
 <div class="page active" id="page-form">
   <div class="pbar"><div class="pfill" id="pfill"></div></div>
 
-  <div class="f-header">
-    <div class="f-header-deco"></div>
+  <div class="fhdr">
+    <div class="fhdr-glow"></div>
+    <div class="fhdr-line"></div>
+    <div class="fhdr-eyebrow">Institut Les Cours Sonou — Site Calavi</div>
     <div class="crown-row">
       <span class="cr">👸</span><span class="cr">👑</span><span class="cr">🤴</span>
     </div>
-    <h1>MISS & MISTER<br>DES COURS SONOU</h1>
-    <div class="inst">Institut Les Cours Sonou — Site Calavi</div>
-    <div class="gdiv"></div>
+    <h1>Miss & <em>Mister</em><br>des Cours Sonou</h1>
+    <div class="sub">Formulaire officiel de candidature</div>
   </div>
 
-  <div class="type-choice">
-    <button class="tc-btn" id="btnMiss" onclick="setType('Miss')">
-      <span class="tci">👸</span>Miss des Cours Sonou
+  <div class="type-wrap">
+    <button class="tc miss-t" id="btnMiss" onclick="setType('Miss')">
+      <div class="tc-glow"></div>
+      <span class="tci">👸</span>
+      <span class="tcl">Miss des Cours Sonou</span>
+      <span class="tcs">Candidates féminines</span>
     </button>
-    <button class="tc-btn" id="btnMister" onclick="setType('Mister')">
-      <span class="tci">🤴</span>Mister des Cours Sonou
+    <button class="tc mister-t" id="btnMister" onclick="setType('Mister')">
+      <div class="tc-glow"></div>
+      <span class="tci">🤴</span>
+      <span class="tcl">Mister des Cours Sonou</span>
+      <span class="tcs">Candidats masculins</span>
     </button>
   </div>
 
   <div id="formWrap" style="display:none">
-  <div class="f-wrap">
+  <div class="fwrap">
 
-    <!-- I -->
+    <!-- I. INFOS PERSO -->
     <div class="fsec">
-      <div class="sh"><span class="em">💁</span><h2>I. Informations Personnelles</h2></div>
-      <div class="sb">
+      <div class="sh"><span class="em">💁</span><h2>Informations Personnelles</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
         <div class="fld full">
           <label>Photo du candidat(e)</label>
           <div class="pzone" id="pzone">
             <input type="file" accept="image/*" id="photoInput" onchange="prevPhoto(this)">
             <span class="pi">📷</span>
-            <p>Appuyez pour choisir votre photo<br><strong>JPG ou PNG recommandé</strong></p>
+            <p class="pt">Appuyez pour choisir votre photo<br><strong>JPG ou PNG · Max 5MB</strong></p>
             <img id="photoPreview">
           </div>
         </div>
-        <div class="fld full"><label>Nom <span class="r">*</span></label><input type="text" id="nom" placeholder="Votre nom de famille" oninput="tick()"></div>
-        <div class="fld full"><label>Prénoms <span class="r">*</span></label><input type="text" id="prenoms" placeholder="Tous vos prénoms" oninput="tick()"></div>
+        <div class="fld full">
+          <label>Nom <span class="r">*</span></label>
+          <input type="text" id="nom" placeholder="Votre nom de famille" oninput="tick();blockDigits(this)" onkeypress="return blockDigitsKey(event)">
+        </div>
+        <div class="fld full">
+          <label>Prénoms <span class="r">*</span></label>
+          <input type="text" id="prenoms" placeholder="Tous vos prénoms" oninput="tick();blockDigits(this)" onkeypress="return blockDigitsKey(event)">
+        </div>
         <div class="fld">
           <label>Date de naissance <span class="r">*</span></label>
           <div class="dr">
-            <input type="text" id="dob_j" placeholder="JJ" maxlength="2">
+            <input type="text" id="dob_j" placeholder="JJ" maxlength="2" style="max-width:58px">
             <span class="dsep">/</span>
-            <input type="text" id="dob_m" placeholder="MM" maxlength="2">
+            <input type="text" id="dob_m" placeholder="MM" maxlength="2" style="max-width:58px">
             <span class="dsep">/</span>
-            <input type="text" id="dob_a" placeholder="AAAA" maxlength="4">
+            <input type="text" id="dob_a" placeholder="AAAA" maxlength="4" style="max-width:82px">
           </div>
+          <span class="hint">Format JJ/MM/AAAA · Âge entre 16 et 35 ans</span>
         </div>
-        <div class="fld"><label>Âge</label><input type="number" id="age" placeholder="ex: 21" min="16" max="40"></div>
+        <div class="fld">
+          <label>Âge <small style="color:var(--text3);font-size:9px;text-transform:none;letter-spacing:0">(auto)</small></label>
+          <input type="number" id="age" placeholder="—" min="16" max="35" readonly style="opacity:.6;cursor:default">
+        </div>
         <div class="fld full"><label>Lieu de naissance</label><input type="text" id="lieu_naiss" placeholder="Ville, Pays"></div>
         <div class="fld"><label>Nationalité</label><input type="text" id="nationalite" placeholder="ex: Béninoise"></div>
-        <div class="fld"><label>Adresse complète</label><input type="text" id="adresse" placeholder="Quartier, Ville"></div>
-        <div class="fld"><label>Téléphone WhatsApp <span class="r">*</span></label><input type="tel" id="tel" placeholder="+229 XX XX XX XX" oninput="tick()"></div>
+        <div class="fld"><label>Adresse</label><input type="text" id="adresse" placeholder="Quartier, Ville"></div>
+        <div class="fld">
+          <label>Téléphone <span class="r">*</span></label>
+          <input type="tel" id="tel" placeholder="+229 XX XX XX XX" oninput="tick()">
+          <span class="hint">Format international recommandé</span>
+        </div>
         <div class="fld"><label>Email</label><input type="email" id="email" placeholder="exemple@mail.com"></div>
       </div>
     </div>
 
-    <!-- II -->
+    <!-- II. ACADÉMIQUE -->
     <div class="fsec">
-      <div class="sh"><span class="em">📚</span><h2>II. Parcours Académique</h2></div>
-      <div class="sb">
-        <div class="fld full"><label>Institut</label><input type="text" value="Les Cours Sonou" readonly style="background:#f5f5f5;color:#777"></div>
+      <div class="sh"><span class="em">📚</span><h2>Parcours Académique</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
+        <div class="fld full"><label>Institut</label><input type="text" value="Les Cours Sonou" readonly style="opacity:.5;cursor:default"></div>
         <div class="fld">
           <label>Niveau d'étude <span class="r">*</span></label>
           <select id="niveau" oninput="tick()">
@@ -338,43 +586,58 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
       </div>
     </div>
 
-    <!-- III -->
+    <!-- III. PHYSIQUE -->
     <div class="fsec">
-      <div class="sh"><span class="em">🏋️</span><h2>III. Fiche Physique</h2></div>
-      <div class="sb">
-        <div class="fld"><label>Taille</label><input type="text" id="taille" placeholder="ex: 1.78 m"></div>
-        <div class="fld"><label>Poids</label><input type="text" id="poids" placeholder="ex: 72 kg"></div>
-        <div class="fld"><label>Style vestimentaire préféré</label><input type="text" id="style" placeholder="ex: Chic, Casual, Afro..."></div>
+      <div class="sh"><span class="em">🏋️</span><h2>Fiche Physique</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
+        <div class="fld">
+          <label>Taille</label>
+          <input type="text" id="taille" placeholder="ex: 1.78">
+          <span class="hint">En mètres · Entre 1.40 et 2.20</span>
+        </div>
+        <div class="fld">
+          <label>Poids</label>
+          <input type="text" id="poids" placeholder="ex: 72">
+          <span class="hint">En kg · Entre 35 et 150</span>
+        </div>
+        <div class="fld"><label>Style vestimentaire</label><input type="text" id="style" placeholder="ex: Chic, Afro..."></div>
         <div class="fld"><label>Couleur préférée</label><input type="text" id="couleur" placeholder="ex: Bleu marine"></div>
-        <div class="fld full"><label>Sport préféré</label><input type="text" id="sport" placeholder="ex: Football, Basketball, Natation..."></div>
+        <div class="fld full"><label>Sport préféré</label><input type="text" id="sport" placeholder="ex: Football, Natation..."></div>
       </div>
     </div>
 
-    <!-- IV -->
+    <!-- IV. PERSONNALITÉ -->
     <div class="fsec">
-      <div class="sh"><span class="em">🎨</span><h2>IV. Centres d'intérêt & Personnalité</h2></div>
-      <div class="sb">
+      <div class="sh"><span class="em">✨</span><h2>Personnalité & Centres d'intérêt</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
         <div class="fld full"><label>Loisirs / Passions</label><input type="text" id="loisirs" placeholder="ex: Musique, Lecture, Voyages..."></div>
         <div class="fld full"><label>Langues parlées</label><input type="text" id="langues" placeholder="ex: Français, Anglais, Fon..."></div>
         <div class="fld full"><label>Trois qualités principales</label><input type="text" id="qualites" placeholder="ex: Sérieux, Créatif, Empathique"></div>
-        <div class="fld full"><label>Deux défauts (ou points à améliorer)</label><input type="text" id="defauts" placeholder="ex: Impatient, Perfectionniste"></div>
-        <div class="fld full"><label>Citation ou valeur qui te représente</label><textarea id="citation" placeholder="Ta citation inspirante..."></textarea></div>
+        <div class="fld full"><label>Deux défauts</label><input type="text" id="defauts" placeholder="ex: Impatient, Perfectionniste"></div>
+        <div class="fld full"><label>Citation qui te représente</label><textarea id="citation" placeholder="Ta citation inspirante..."></textarea></div>
       </div>
     </div>
 
-    <!-- V -->
+    <!-- V. MOTIVATION -->
     <div class="fsec">
-      <div class="sh"><span class="em">🔥</span><h2>V. Motivation</h2></div>
-      <div class="sb">
-        <div class="fld full"><label>Pourquoi veux-tu participer au concours ? <span class="r">*</span></label><textarea id="motivation1" placeholder="Exprime ta motivation sincère..." style="min-height:96px" oninput="tick()"></textarea></div>
-        <div class="fld full"><label id="motiv2lbl">Quelle image souhaites-tu représenter ?</label><textarea id="motivation2" placeholder="Décris l'image que tu veux incarner..." style="min-height:96px"></textarea></div>
+      <div class="sh"><span class="em">🔥</span><h2>Motivation</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
+        <div class="fld full">
+          <label>Pourquoi participer ? <span class="r">*</span></label>
+          <textarea id="motivation1" placeholder="Exprime ta motivation sincère..." style="min-height:100px" oninput="tick();updateCount('motivation1','count1',30)"></textarea>
+          <div class="char-count" id="count1">0 / 30 caractères minimum</div>
+        </div>
+        <div class="fld full">
+          <label id="motiv2lbl">Image que tu veux représenter</label>
+          <textarea id="motivation2" placeholder="Décris l'image que tu veux incarner..." style="min-height:90px"></textarea>
+        </div>
       </div>
     </div>
 
-    <!-- VI -->
+    <!-- VI. ENGAGEMENT -->
     <div class="fsec">
-      <div class="sh"><span class="em">🤝</span><h2>VI. Engagement</h2></div>
-      <div class="sb">
+      <div class="sh"><span class="em">🤝</span><h2>Engagement</h2><div class="sh-dot"></div></div>
+      <div class="sbody">
         <div class="full">
           <ul class="el">
             <li>Porter fièrement les valeurs de l'Institut Les Cours Sonou.</li>
@@ -382,20 +645,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
             <li>Participer à toutes les activités liées au concours.</li>
           </ul>
         </div>
-        <div class="fld full">
-          <label>Signature</label>
-          <canvas id="sigCanvas" width="680" height="108"></canvas>
-          <p class="sig-hint">✍️ Signez avec votre doigt ou souris</p>
-          <button class="btn-clr" onclick="clearSig()">✕ Effacer</button>
-        </div>
         <div class="fld">
-          <label>Date de signature</label>
+          <label>Date d'engagement</label>
           <div class="dr">
-            <input type="text" id="sig_j" placeholder="JJ" maxlength="2">
+            <input type="text" id="sig_j" placeholder="JJ" maxlength="2" style="max-width:58px">
             <span class="dsep">/</span>
-            <input type="text" id="sig_m" placeholder="MM" maxlength="2">
+            <input type="text" id="sig_m" placeholder="MM" maxlength="2" style="max-width:58px">
             <span class="dsep">/</span>
-            <input type="text" id="sig_a" placeholder="AAAA" maxlength="4">
+            <input type="text" id="sig_a" placeholder="AAAA" maxlength="4" style="max-width:82px">
           </div>
         </div>
       </div>
@@ -404,61 +661,77 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
       </div>
     </div>
 
-  </div><!-- /f-wrap -->
-  </div><!-- /formWrap -->
-
-  <div id="choosePrompt" style="text-align:center;padding:36px 20px 100px;color:rgba(255,255,255,.35);font-size:13px">
-    ↑ Choisissez votre concours pour commencer
   </div>
+  </div>
+
+  <div id="choosePrompt">↑ Choisissez votre concours pour commencer</div>
 </div>
 
-<!-- ============================================================ -->
-<!--  PAGE ADMIN                                                  -->
-<!-- ============================================================ -->
+<!-- ═══════════════════════════ ADMIN PAGE ═══ -->
 <div class="page" id="page-admin">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sl">
-      <div class="lc">👑</div>
-      <h2>MISS & MISTER<br>COURS SONOU</h2>
-      <p>ADMINISTRATION</p>
+      <div class="sl-brand">
+        <div class="sl-ico">👑</div>
+        <div>
+          <div class="sl-name">Cours Sonou</div>
+          <div class="sl-sub">Administration</div>
+        </div>
+      </div>
     </div>
     <div class="ns">
-      <div class="nl">Menu</div>
-      <button class="nb active" onclick="setView('all')"><span class="ni">📋</span> Tous les candidats</button>
-      <button class="nb" onclick="setView('Miss')"><span class="ni">👸</span> Miss uniquement</button>
-      <button class="nb" onclick="setView('Mister')"><span class="ni">🤴</span> Mister uniquement</button>
+      <div class="nl">Vues</div>
+      <button class="nb active" onclick="setView('all')"><span class="ni">📋</span>Tous les candidats</button>
+      <button class="nb" onclick="setView('Miss')"><span class="ni">👸</span>Miss uniquement</button>
+      <button class="nb" onclick="setView('Mister')"><span class="ni">🤴</span>Mister uniquement</button>
     </div>
     <div class="ns">
-      <div class="nl">Actions</div>
-      <button class="nb" onclick="exportAllPDF()"><span class="ni">📤</span> Exporter tout (PDF)</button>
-      <button class="nb" onclick="loadCandidats()"><span class="ni">🔄</span> Actualiser</button>
+      <div class="nl">Exports PDF</div>
+      <button class="nb" onclick="exportPDF('all')"><span class="ni">📤</span>Exporter tous</button>
+      <button class="nb" onclick="exportPDF('Miss')"><span class="ni">👸</span>PDF Miss</button>
+      <button class="nb" onclick="exportPDF('Mister')"><span class="ni">🤴</span>PDF Mister</button>
+    </div>
+    <div class="ns">
+      <div class="nl">Système</div>
+      <button class="nb" onclick="loadCandidats()"><span class="ni">🔄</span>Actualiser</button>
+      <button class="nb" onclick="adminLogout()"><span class="ni">🔒</span>Déconnecter</button>
     </div>
     <div class="sst">
-      <div class="ssm"><div class="sv" id="stTotal">—</div><div class="sl2">TOTAL INSCRITS</div></div>
-      <div class="sr">
-        <div class="ssm sm"><div class="sv" id="stMiss">—</div><div class="sl2">MISS</div></div>
-        <div class="ssm smr"><div class="sv" id="stMister">—</div><div class="sl2">MISTER</div></div>
+      <div class="stat-pill"><div class="sv" id="stTotal">—</div><div class="sl2">Inscrits au total</div></div>
+      <div class="stat-grid">
+        <div class="stat-pill stat-miss"><div class="sv" id="stMiss">—</div><div class="sl2">Miss</div></div>
+        <div class="stat-pill stat-mister"><div class="sv" id="stMister">—</div><div class="sl2">Mister</div></div>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <div class="main">
+  <div class="amain">
     <div class="topbar">
-      <button class="mnu-btn" id="menuBtn" onclick="toggleSidebar()">☰</button>
+      <button class="mnu-btn" onclick="toggleSidebar()">☰</button>
       <h1 id="topTitle">Tous les candidats</h1>
       <div class="sp"></div>
-      <div class="sb2"><span>🔍</span><input type="text" id="searchInput" placeholder="Rechercher un nom..." oninput="filterCandidats()"></div>
+      <div class="sbar"><span style="color:var(--text3);font-size:14px">🔍</span><input type="text" id="searchInput" placeholder="Rechercher..." oninput="filterCandidats()"></div>
     </div>
-
     <div class="acontent">
       <div class="stats-row">
-        <div class="sc gold"><div class="sv" id="sc0">—</div><div class="sl2">Total inscrits</div></div>
-        <div class="sc miss"><div class="sv" id="sc1">—</div><div class="sl2">Candidates Miss</div></div>
-        <div class="sc mister"><div class="sv" id="sc2">—</div><div class="sl2">Candidats Mister</div></div>
-        <div class="sc"><div class="sv" id="sc3">—</div><div class="sl2">Filières</div></div>
+        <div class="sc green-s">
+          <div class="sc-glow"></div>
+          <div class="sc-icon">👥</div>
+          <div class="sv" id="sc0">—</div>
+          <div class="sl2">Total inscrits</div>
+        </div>
+        <div class="sc miss-s">
+          <div class="sc-glow"></div>
+          <div class="sc-icon">👸</div>
+          <div class="sv" id="sc1">—</div>
+          <div class="sl2">Candidates Miss</div>
+        </div>
+        <div class="sc mister-s">
+          <div class="sc-glow"></div>
+          <div class="sc-icon">🤴</div>
+          <div class="sv" id="sc2">—</div>
+          <div class="sl2">Candidats Mister</div>
+        </div>
       </div>
       <div class="ebar">
         <div class="pills">
@@ -467,7 +740,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
           <button class="pill mister" id="pill-mister" onclick="setView('Mister')">🤴 Mister</button>
         </div>
         <span class="esp" id="countLbl"></span>
-        <button class="btn-exp gld" onclick="exportAllPDF()">📤 Exporter PDF</button>
+        <div class="exp-btns">
+          <button class="btn-exp emiss" onclick="exportPDF('Miss')">👸 PDF Miss</button>
+          <button class="btn-exp emister" onclick="exportPDF('Mister')">🤴 PDF Mister</button>
+          <button class="btn-exp eall" onclick="exportPDF('all')">📤 Tous</button>
+        </div>
       </div>
       <div id="gridArea"><div class="ldr"><div class="spin">⏳</div><br>Chargement...</div></div>
     </div>
@@ -475,7 +752,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
 </div>
 
 <!-- MODAL FICHE -->
-<div class="mov" id="mov" onclick="closeMov(event)">
+<div class="mov" id="mov" onclick="if(event.target===this)closeMod()">
   <div class="mod">
     <div class="mhd">
       <div class="mph" id="mph">👤</div>
@@ -483,8 +760,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
       <button class="mclose" onclick="closeMod()">✕</button>
     </div>
     <div class="mbd" id="mbd"></div>
-    <div class="macts">
-      <button class="btn-gs" onclick="exportOnePDF()">📄 PDF</button>
+    <div class="macts2">
+      <button class="btn-gs" onclick="exportOnePDF()">📄 Exporter PDF</button>
       <button class="btn-nv" onclick="closeMod()">Fermer</button>
     </div>
   </div>
@@ -493,8 +770,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
 <!-- CONFIRM DELETE -->
 <div class="cov" id="cov">
   <div class="cbox">
-    <h3>Supprimer ce candidat ?</h3>
-    <p>Cette action est irréversible.</p>
+    <div class="cico">🗑️</div>
+    <h3>Supprimer ?</h3>
+    <p>Cette action est irréversible.<br>Le candidat sera définitivement retiré.</p>
     <div class="cbtns">
       <button class="btn-can" onclick="document.getElementById('cov').classList.remove('show')">Annuler</button>
       <button class="btn-del" id="delBtn">Supprimer</button>
@@ -502,148 +780,226 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);min-height:100vh;co
   </div>
 </div>
 
-<!-- SUCCESS FORM -->
+<!-- SUCCESS -->
 <div class="suc-scr" id="sucScr">
+  <div class="suc-glow"></div>
   <div class="bc">👑</div>
   <h2>Candidature Soumise !</h2>
   <div class="cnum" id="cnum">N° —</div>
   <p>Ta candidature a été enregistrée avec succès.<br>L'administration te contactera prochainement.</p>
-  <div style="height:20px"></div>
+  <div style="height:24px"></div>
   <div class="sbtns">
     <button class="btn-g" onclick="printFiche()">🖨️ Imprimer ma fiche</button>
     <button class="btn-o" onclick="resetForm()">+ Nouvelle candidature</button>
   </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="edit-ov" id="editOv" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-box">
+    <div class="edit-hd">
+      <span style="font-size:20px">✏️</span>
+      <h3>Modifier le candidat</h3>
+      <div style="flex:1"></div>
+      <button class="mclose" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="edit-body" id="editBody"></div>
+    <div class="edit-ftr">
+      <button class="btn-save" id="btnSave" onclick="saveEdit()">💾 Enregistrer les modifications</button>
+      <button class="btn-nv" onclick="closeEdit()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="login-modal" id="loginModal">
+  <div class="login-box">
+    <div class="login-glow"></div>
+    <span class="lico">🔐</span>
+    <h3>Accès Administration</h3>
+    <p>Réservé à l'administrateur.<br>Entrez le mot de passe pour continuer.</p>
+    <div class="pwd-wrap">
+      <input type="password" id="adminPwd" placeholder="Mot de passe..." onkeydown="if(event.key==='Enter')checkLogin()">
+      <button class="pwd-toggle" onclick="togglePwd()">👁</button>
+    </div>
+    <div class="login-err" id="loginErr">❌ Mot de passe incorrect.</div>
+    <div class="login-btns">
+      <button class="btn-login-can" onclick="closeLogin()">Annuler</button>
+      <button class="btn-login" onclick="checkLogin()">Entrer →</button>
+    </div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <div class="app-nav">
   <button class="active" id="nav-form" onclick="goPage('form')">
-    <span class="nav-ico">📝</span>Inscription
+    <span class="ni">📝</span>Inscription
   </button>
-  <button id="nav-admin" onclick="goPage('admin')">
-    <span class="nav-ico">📊</span>Admin
+  <button id="nav-admin" onclick="openAdminLogin()">
+    <span class="ni">📊</span>Admin
   </button>
 </div>
 
-<!-- TOAST -->
 <div class="tst" id="tst"></div>
 
 <script>
-// ================================================================
-//  CONFIGURATION SUPABASE
-// ================================================================
+// ══════════════════════════════════════════
+//  CONFIG — changez le mot de passe ici 🔑
+// ══════════════════════════════════════════
 const SUPABASE_URL = 'https://jeqdzkjkfkgflgijwqwj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_qs7pYHHGTJvJ5Gi_-MeK7g_BANNiQnj';
-// ================================================================
+const ADMIN_PASSWORD = 'sonou2025';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const { jsPDF } = window.jspdf;
 
-// ---- STATE ----
-let concours_type = '';
-let photoB64 = '';
-let sigData = '';
-let allCandidats = [];
-let filtered = [];
-let curView = 'all';
-let curCand = null;
+let concours_type='', photoB64='';
+let allCandidats=[], filtered=[], curView='all', curCand=null;
 
-// ================================================================
-//  NAVIGATION
-// ================================================================
+// ══ NAVIGATION ══
 function goPage(p) {
-  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.app-nav button').forEach(x => x.classList.remove('active'));
-  document.getElementById('page-' + p).classList.add('active');
-  document.getElementById('nav-' + p).classList.add('active');
-  if (p === 'admin') loadCandidats();
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.app-nav button').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  if(p==='admin') loadCandidats();
 }
 
-// ================================================================
-//  FORM
-// ================================================================
+// ══ ADMIN LOGIN ══
+function openAdminLogin() {
+  if(sessionStorage.getItem('adminOk')==='1'){ goPage('admin'); return; }
+  document.getElementById('loginModal').classList.add('show');
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('adminPwd').value='';
+  setTimeout(()=>document.getElementById('adminPwd').focus(),150);
+}
+function closeLogin() {
+  document.getElementById('loginModal').classList.remove('show');
+  document.getElementById('adminPwd').value='';
+}
+function checkLogin() {
+  const pwd=document.getElementById('adminPwd').value;
+  if(pwd===ADMIN_PASSWORD){
+    sessionStorage.setItem('adminOk','1');
+    closeLogin();
+    goPage('admin');
+    toast('✅ Connecté en tant qu\'administrateur');
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('adminPwd').value='';
+    document.getElementById('adminPwd').focus();
+  }
+}
+function adminLogout() {
+  sessionStorage.removeItem('adminOk');
+  goPage('form');
+  toast('🔒 Déconnecté du dashboard');
+}
+function togglePwd() {
+  const i=document.getElementById('adminPwd');
+  i.type=i.type==='password'?'text':'password';
+}
+
+// ══ FORM ══
 function setType(type) {
-  concours_type = type;
-  document.getElementById('btnMiss').classList.toggle('active', type === 'Miss');
-  document.getElementById('btnMister').classList.toggle('active', type === 'Mister');
-  document.getElementById('formWrap').style.display = 'block';
-  document.getElementById('choosePrompt').style.display = 'none';
-  document.getElementById('motiv2lbl').textContent = type === 'Miss'
-    ? "Quelle image de la femme étudiante souhaites-tu représenter ?"
-    : "Quelle image de l'homme étudiant souhaites-tu représenter ?";
-  window.scrollTo({ top: document.getElementById('formWrap').offsetTop - 50, behavior: 'smooth' });
+  concours_type=type;
+  document.getElementById('btnMiss').classList.toggle('active',type==='Miss');
+  document.getElementById('btnMister').classList.toggle('active',type==='Mister');
+  document.getElementById('formWrap').style.display='block';
+  document.getElementById('choosePrompt').style.display='none';
+  document.getElementById('motiv2lbl').textContent=type==='Miss'
+    ?"Image de la femme étudiante que tu veux représenter"
+    :"Image de l'homme étudiant que tu veux représenter";
+  window.scrollTo({top:document.getElementById('formWrap').offsetTop-50,behavior:'smooth'});
+  tick();
 }
 
-const reqF = ['nom','prenoms','tel','niveau','motivation1'];
+const reqF=['nom','prenoms','tel','niveau','motivation1'];
 function tick() {
-  const n = reqF.filter(id => (document.getElementById(id)?.value||'').trim()).length;
-  document.getElementById('pfill').style.width = (concours_type?8:0) + (n/reqF.length*92) + '%';
+  const n=reqF.filter(id=>(document.getElementById(id)?.value||'').trim()).length;
+  document.getElementById('pfill').style.width=(concours_type?8:0)+(n/reqF.length*92)+'%';
+}
+
+function updateCount(id,countId,min) {
+  const len=(document.getElementById(id)?.value||'').length;
+  const el=document.getElementById(countId);
+  el.textContent=len+' / '+min+' caractères minimum';
+  el.className='char-count'+(len>=min?' ok':len>min/2?' warn':'');
 }
 
 function prevPhoto(input) {
-  const f = input.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = e => {
-    photoB64 = e.target.result;
-    const img = document.getElementById('photoPreview');
-    img.src = photoB64; img.style.display = 'block';
-    document.querySelector('.pzone .pi').style.display = 'none';
-    document.querySelector('.pzone p').style.display = 'none';
+  const f=input.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ toast('❌ Photo trop lourde (max 5MB)'); return; }
+  const r=new FileReader();
+  r.onload=e=>{
+    photoB64=e.target.result;
+    const img=document.getElementById('photoPreview');
+    img.src=photoB64; img.style.display='block';
+    document.querySelector('.pzone .pi').style.display='none';
+    document.querySelector('.pzone .pt').style.display='none';
   };
   r.readAsDataURL(f);
 }
 
-// Signature
-const canvas = document.getElementById('sigCanvas');
-const ctx = canvas.getContext('2d');
-let drawing = false, lx=0, ly=0;
-function gp(e) {
-  const r = canvas.getBoundingClientRect();
-  const sx = canvas.width/r.width, sy = canvas.height/r.height;
-  const cx = e.touches?e.touches[0].clientX:e.clientX;
-  const cy = e.touches?e.touches[0].clientY:e.clientY;
-  return { x:(cx-r.left)*sx, y:(cy-r.top)*sy };
+function blockDigitsKey(e){ return !/[0-9]/.test(e.key); }
+function blockDigits(el){
+  const c=el.value.replace(/[0-9]/g,'');
+  if(c!==el.value){ el.value=c; toast('⚠️ Chiffres non autorisés ici'); }
 }
-function drawLine(e) {
-  if (!drawing) return;
-  const p = gp(e);
-  ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y);
-  ctx.strokeStyle='#0D1B3E'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.stroke();
-  lx=p.x; ly=p.y;
+
+// ══ VALIDATION ══
+function errField(id,msg) {
+  const el=document.getElementById(id);
+  el.classList.add('inv'); el.focus();
+  toast('⚠️ '+msg);
+  setTimeout(()=>el.classList.remove('inv'),2800);
+  return false;
 }
-canvas.addEventListener('mousedown', e=>{drawing=true;const p=gp(e);lx=p.x;ly=p.y});
-canvas.addEventListener('mousemove', drawLine);
-canvas.addEventListener('mouseup', ()=>{drawing=false;sigData=canvas.toDataURL()});
-canvas.addEventListener('mouseleave', ()=>drawing=false);
-canvas.addEventListener('touchstart', e=>{e.preventDefault();drawing=true;const p=gp(e);lx=p.x;ly=p.y},{passive:false});
-canvas.addEventListener('touchmove', e=>{e.preventDefault();drawLine(e)},{passive:false});
-canvas.addEventListener('touchend', ()=>{drawing=false;sigData=canvas.toDataURL()});
-function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);sigData='';}
 
 function validate() {
-  if (!concours_type) { toast('⚠️ Choisissez Miss ou Mister','#e53e3e'); return false; }
-  for (const f of [{id:'nom',l:'Nom'},{id:'prenoms',l:'Prénoms'},{id:'tel',l:'Téléphone'},{id:'niveau',l:'Niveau d\'étude'},{id:'motivation1',l:'Motivation'}]) {
-    const el = document.getElementById(f.id);
-    if (!el.value.trim()) {
-      el.classList.add('inv'); el.focus();
-      toast('⚠️ Champ obligatoire : ' + f.l,'#e53e3e');
-      setTimeout(()=>el.classList.remove('inv'),2500);
-      return false;
-    }
-  }
+  if(!concours_type){ toast('⚠️ Choisissez Miss ou Mister'); return false; }
+  const nom=v('nom');
+  if(!nom) return errField('nom','Le champ Nom est obligatoire.');
+  if(!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(nom)) return errField('nom','Le nom ne doit contenir que des lettres.');
+  const prenoms=v('prenoms');
+  if(!prenoms) return errField('prenoms','Le champ Prénoms est obligatoire.');
+  if(!/^[a-zA-ZÀ-ÿ\s\-']+$/.test(prenoms)) return errField('prenoms','Les prénoms ne doivent contenir que des lettres.');
+  const j=document.getElementById('dob_j').value.trim();
+  const m=document.getElementById('dob_m').value.trim();
+  const a=document.getElementById('dob_a').value.trim();
+  if(!j||!m||!a) return errField('dob_j','La date de naissance est obligatoire.');
+  const jn=parseInt(j),mn=parseInt(m),an=parseInt(a);
+  if(isNaN(jn)||isNaN(mn)||isNaN(an)||jn<1||jn>31||mn<1||mn>12||an<1950||an>2010)
+    return errField('dob_j','Date de naissance invalide.');
+  const dn=new Date(an,mn-1,jn), td=new Date();
+  let age=td.getFullYear()-dn.getFullYear();
+  if(td.getMonth()-dn.getMonth()<0||(td.getMonth()===dn.getMonth()&&td.getDate()<dn.getDate())) age--;
+  if(age<16||age>35) return errField('dob_j',`Âge ${age} ans — doit être entre 16 et 35 ans.`);
+  document.getElementById('age').value=age;
+  const tel=v('tel');
+  if(!tel) return errField('tel','Le numéro de téléphone est obligatoire.');
+  if(!/^(\+?[0-9]{8,15})$/.test(tel.replace(/\s/g,''))) return errField('tel','Numéro invalide. Ex: +22961234567');
+  if(!v('niveau')) return errField('niveau','Veuillez sélectionner votre niveau.');
+  const taille=v('taille');
+  if(taille){ const t=parseFloat(taille.replace(',','.')); if(isNaN(t)||t<1.40||t>2.20) return errField('taille','Taille invalide (1.40 à 2.20 m).'); }
+  const poids=v('poids');
+  if(poids){ const p=parseFloat(poids.replace(',','.')); if(isNaN(p)||p<35||p>150) return errField('poids','Poids invalide (35 à 150 kg).'); }
+  const motiv=v('motivation1');
+  if(!motiv) return errField('motivation1','La motivation est obligatoire.');
+  if(motiv.length<30) return errField('motivation1',`Motivation trop courte (${motiv.length} car.). Minimum 30.`);
   return true;
 }
 
 async function submitForm() {
-  if (!validate()) return;
-  const btn = document.getElementById('btnSub');
-  btn.disabled = true; btn.textContent = '⏳ Envoi en cours...';
-  const dob = `${document.getElementById('dob_j').value}/${document.getElementById('dob_m').value}/${document.getElementById('dob_a').value}`;
-  const sdate = `${document.getElementById('sig_j').value}/${document.getElementById('sig_m').value}/${document.getElementById('sig_a').value}`;
-  const payload = {
+  if(!validate()) return;
+  const btn=document.getElementById('btnSub');
+  btn.disabled=true; btn.textContent='⏳ Envoi en cours...';
+  const dob=`${document.getElementById('dob_j').value}/${document.getElementById('dob_m').value}/${document.getElementById('dob_a').value}`;
+  const sdate=`${document.getElementById('sig_j').value}/${document.getElementById('sig_m').value}/${document.getElementById('sig_a').value}`;
+  const payload={
     concours_type, nom:v('nom'), prenoms:v('prenoms'), date_naissance:dob,
-    lieu_naissance:v('lieu_naiss'), age:document.getElementById('age').value||null,
+    lieu_naissance:v('lieu_naiss'), age:parseInt(document.getElementById('age').value)||null,
     nationalite:v('nationalite'), adresse:v('adresse'), telephone:v('tel'), email:v('email'),
     niveau:v('niveau'), filiere:v('filiere'), matricule:v('matricule'),
     taille:v('taille'), poids:v('poids'), style_vestimentaire:v('style'),
@@ -651,114 +1007,113 @@ async function submitForm() {
     loisirs:v('loisirs'), langues:v('langues'), qualites:v('qualites'),
     defauts:v('defauts'), citation:v('citation'),
     motivation1:v('motivation1'), motivation2:v('motivation2'),
-    photo:photoB64||null, signature:sigData||null, date_signature:sdate,
+    photo:photoB64||null, date_signature:sdate,
     created_at:new Date().toISOString()
   };
   try {
     const { data, error } = await db.from('candidats').insert([payload]).select();
-    if (error) throw error;
-    const id = data[0]?.id || '—';
-    document.getElementById('cnum').textContent = `N° ${String(id).padStart(3,'0')} — ${concours_type}`;
+    if(error) throw new Error(error.message||error.details||JSON.stringify(error));
+    const id=data[0]?.id||'—';
+    document.getElementById('cnum').textContent=`N° ${String(id).padStart(3,'0')} — ${concours_type}`;
     document.getElementById('sucScr').classList.add('show');
-    document.getElementById('pfill').style.width = '100%';
+    document.getElementById('pfill').style.width='100%';
   } catch(err) {
-    console.error(err);
-    toast('❌ Erreur : ' + (err.message||'Connexion impossible'),'#e53e3e');
-    btn.disabled = false; btn.textContent = '✦ Soumettre ma candidature ✦';
+    console.error('Erreur soumission:', err);
+    toast('❌ '+(err.message||'Erreur de connexion'));
+    btn.disabled=false; btn.textContent='✦ Soumettre ma candidature ✦';
   }
 }
 function v(id){ return (document.getElementById(id)?.value||'').trim(); }
 
-function printFiche() { document.getElementById('sucScr').classList.remove('show'); setTimeout(()=>window.print(),300); }
+function printFiche(){ document.getElementById('sucScr').classList.remove('show'); setTimeout(()=>window.print(),300); }
 
 function resetForm() {
   document.getElementById('sucScr').classList.remove('show');
-  document.querySelectorAll('#page-form input:not([readonly]), #page-form textarea').forEach(el=>el.value='');
+  document.querySelectorAll('#page-form input:not([readonly]),#page-form textarea').forEach(el=>el.value='');
   document.querySelectorAll('#page-form select').forEach(el=>el.selectedIndex=0);
-  clearSig(); photoB64='';
-  const img = document.getElementById('photoPreview'); img.style.display='none';
+  photoB64='';
+  const img=document.getElementById('photoPreview'); img.style.display='none';
   document.querySelector('.pzone .pi').style.display='block';
-  document.querySelector('.pzone p').style.display='block';
+  document.querySelector('.pzone .pt').style.display='block';
   document.getElementById('btnSub').disabled=false;
   document.getElementById('btnSub').textContent='✦ Soumettre ma candidature ✦';
   concours_type='';
-  document.getElementById('btnMiss').classList.remove('active');
-  document.getElementById('btnMister').classList.remove('active');
+  ['btnMiss','btnMister'].forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('formWrap').style.display='none';
   document.getElementById('choosePrompt').style.display='block';
   document.getElementById('pfill').style.width='0%';
+  document.getElementById('count1').textContent='0 / 30 caractères minimum';
   window.scrollTo(0,0);
 }
 
-// ================================================================
-//  ADMIN
-// ================================================================
+// ══ ADMIN DATA ══
 async function loadCandidats() {
-  document.getElementById('gridArea').innerHTML = '<div class="ldr"><div class="spin">⏳</div><br>Chargement...</div>';
+  document.getElementById('gridArea').innerHTML='<div class="ldr"><div class="spin">⏳</div><br>Chargement...</div>';
   try {
     const { data, error } = await db.from('candidats').select('*').order('created_at',{ascending:false});
-    if (error) throw error;
-    allCandidats = data||[];
+    if(error) throw new Error(error.message||JSON.stringify(error));
+    allCandidats=data||[];
     updateStats(); filterCandidats();
     toast('✅ '+allCandidats.length+' candidat(s) chargé(s)');
   } catch(e) {
-    document.getElementById('gridArea').innerHTML = '<div class="empty-s"><div class="ee">⚠️</div><p>Erreur Supabase.<br>'+e.message+'</p></div>';
+    document.getElementById('gridArea').innerHTML=`<div class="empty-s"><div class="ee">⚠️</div><p>Erreur de connexion<br><small style="font-size:10px;opacity:.6">${e.message}</small></p></div>`;
   }
 }
 
 function updateStats() {
-  const miss = allCandidats.filter(c=>c.concours_type==='Miss').length;
-  const mister = allCandidats.filter(c=>c.concours_type==='Mister').length;
-  const fil = new Set(allCandidats.map(c=>c.filiere).filter(Boolean)).size;
-  const tot = allCandidats.length;
+  const miss=allCandidats.filter(c=>c.concours_type==='Miss').length;
+  const mister=allCandidats.filter(c=>c.concours_type==='Mister').length;
+  const fil=new Set(allCandidats.map(c=>c.filiere).filter(Boolean)).size;
+  const tot=allCandidats.length;
   ['stTotal','sc0'].forEach(id=>document.getElementById(id).textContent=tot);
   ['stMiss','sc1'].forEach(id=>document.getElementById(id).textContent=miss);
   ['stMister','sc2'].forEach(id=>document.getElementById(id).textContent=mister);
-  document.getElementById('sc3').textContent=fil||'—';
+  document.getElementById('sc3') && (document.getElementById('sc3').textContent=fil||'—');
 }
 
 function setView(view) {
-  curView = view;
+  curView=view;
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  const map = {all:0,Miss:1,Mister:2};
+  const map={all:0,Miss:1,Mister:2};
   document.querySelectorAll('.nb')[map[view]].classList.add('active');
   document.getElementById('pill-'+{all:'all',Miss:'miss',Mister:'mister'}[view]).classList.add('active');
-  document.getElementById('topTitle').textContent = view==='all'?'Tous les candidats':view==='Miss'?'Candidates Miss':'Candidats Mister';
+  document.getElementById('topTitle').textContent=view==='all'?'Tous les candidats':view==='Miss'?'Candidates Miss':'Candidats Mister';
   filterCandidats();
 }
 
 function filterCandidats() {
-  const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
-  filtered = allCandidats.filter(c => {
-    const tm = curView==='all'||c.concours_type===curView;
-    const sm = !q||`${c.nom} ${c.prenoms}`.toLowerCase().includes(q);
+  const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
+  filtered=allCandidats.filter(c=>{
+    const tm=curView==='all'||c.concours_type===curView;
+    const sm=!q||`${c.nom} ${c.prenoms}`.toLowerCase().includes(q);
     return tm&&sm;
   });
-  document.getElementById('countLbl').textContent = filtered.length+' résultat(s)';
+  document.getElementById('countLbl').textContent=filtered.length+' résultat(s)';
   renderGrid();
 }
 
 function renderGrid() {
-  const area = document.getElementById('gridArea');
-  if (!filtered.length) { area.innerHTML='<div class="empty-s"><div class="ee">🔍</div><p>Aucun candidat trouvé.</p></div>'; return; }
-  const grid = document.createElement('div'); grid.className='cgrid';
-  filtered.forEach((c,i) => {
-    const num = String(c.id||i+1).padStart(3,'0');
-    const isMiss = c.concours_type==='Miss';
-    const card = document.createElement('div'); card.className='cc';
-    card.innerHTML = `
+  const area=document.getElementById('gridArea');
+  if(!filtered.length){ area.innerHTML='<div class="empty-s"><div class="ee">🔍</div><p>Aucun candidat trouvé.</p></div>'; return; }
+  const grid=document.createElement('div'); grid.className='cgrid';
+  filtered.forEach((c,i)=>{
+    const num=String(c.id||i+1).padStart(3,'0');
+    const isMiss=c.concours_type==='Miss';
+    const card=document.createElement('div'); card.className='cc';
+    card.innerHTML=`
       <div class="cp">
         ${c.photo?`<img src="${c.photo}" alt="">`:(isMiss?'👸':'🤴')}
-        <span class="cb ${isMiss?'cb-m':'cb-mr'}">${c.concours_type}</span>
+        <span class="cbdg ${isMiss?'bdg-m':'bdg-mr'}">${c.concours_type}</span>
       </div>
-      <div class="ci">
-        <div class="cn">N° ${num}</div>
+      <div class="cinfo">
+        <div class="cnum2">Candidat N° ${num}</div>
         <div class="cname">${c.nom} ${c.prenoms}</div>
         <div class="csub">${c.filiere||c.niveau||'—'}</div>
       </div>
       <div class="cacts">
         <button class="ab" onclick="openMod(${c.id})">👁 Voir</button>
+        <button class="ab edit" onclick="openEdit(${c.id})">✏️ Modifier</button>
         <button class="ab" onclick="expOne(${c.id})">📄 PDF</button>
         <button class="ab del" onclick="confirmDel(${c.id})">🗑</button>
       </div>`;
@@ -767,118 +1122,110 @@ function renderGrid() {
   area.innerHTML=''; area.appendChild(grid);
 }
 
-// MODAL
 function openMod(id) {
-  curCand = allCandidats.find(x=>x.id===id); if (!curCand) return;
-  const c = curCand;
+  curCand=allCandidats.find(x=>x.id===id); if(!curCand) return;
+  const c=curCand;
   document.getElementById('mname').textContent=`${c.nom} ${c.prenoms}`;
   document.getElementById('mmeta').textContent=`${c.concours_type} • N°${String(c.id).padStart(3,'0')} • ${c.niveau||'—'}`;
-  const ph = document.getElementById('mph');
-  ph.innerHTML = c.photo?`<img src="${c.photo}">`:(c.concours_type==='Miss'?'👸':'🤴');
-  document.getElementById('mbd').innerHTML = buildFiche(c);
+  const ph=document.getElementById('mph');
+  ph.innerHTML=c.photo?`<img src="${c.photo}">`:(c.concours_type==='Miss'?'👸':'🤴');
+  document.getElementById('mbd').innerHTML=buildFiche(c);
   document.getElementById('mov').classList.add('show');
 }
-function closeMov(e){if(e.target===document.getElementById('mov'))closeMod();}
-function closeMod(){document.getElementById('mov').classList.remove('show');}
+function closeMod(){ document.getElementById('mov').classList.remove('show'); }
 
-function s(v){return v||'<span style="color:#ccc">—</span>'}
+function sv(val){ return val||'<span style="color:var(--text3);font-style:italic;font-size:11px">—</span>'; }
 function buildFiche(c){
   return `
-    <div class="msec"><h4>Informations personnelles</h4><div class="ig">
-      <div class="ii"><div class="il">Date naissance</div><div class="iv">${s(c.date_naissance)}</div></div>
-      <div class="ii"><div class="il">Âge</div><div class="iv">${c.age?c.age+' ans':s(null)}</div></div>
-      <div class="ii"><div class="il">Lieu naissance</div><div class="iv">${s(c.lieu_naissance)}</div></div>
-      <div class="ii"><div class="il">Nationalité</div><div class="iv">${s(c.nationalite)}</div></div>
-      <div class="ii"><div class="il">Téléphone</div><div class="iv">${s(c.telephone)}</div></div>
-      <div class="ii"><div class="il">Email</div><div class="iv">${s(c.email)}</div></div>
-      <div class="ii full"><div class="il">Adresse</div><div class="iv">${s(c.adresse)}</div></div>
-    </div></div>
-    <div class="msec"><h4>Parcours académique</h4><div class="ig">
-      <div class="ii"><div class="il">Niveau</div><div class="iv">${s(c.niveau)}</div></div>
-      <div class="ii"><div class="il">Filière</div><div class="iv">${s(c.filiere)}</div></div>
-      <div class="ii full"><div class="il">Matricule</div><div class="iv">${s(c.matricule)}</div></div>
-    </div></div>
-    <div class="msec"><h4>Fiche physique</h4><div class="ig">
-      <div class="ii"><div class="il">Taille</div><div class="iv">${s(c.taille)}</div></div>
-      <div class="ii"><div class="il">Poids</div><div class="iv">${s(c.poids)}</div></div>
-      <div class="ii"><div class="il">Style</div><div class="iv">${s(c.style_vestimentaire)}</div></div>
-      <div class="ii"><div class="il">Sport préféré</div><div class="iv">${s(c.sport_prefere)}</div></div>
-    </div></div>
-    <div class="msec"><h4>Personnalité</h4><div class="ig">
-      <div class="ii full"><div class="il">Loisirs</div><div class="iv">${s(c.loisirs)}</div></div>
-      <div class="ii full"><div class="il">Langues</div><div class="iv">${s(c.langues)}</div></div>
-      <div class="ii full"><div class="il">Qualités</div><div class="iv">${s(c.qualites)}</div></div>
-      <div class="ii full"><div class="il">Défauts</div><div class="iv">${s(c.defauts)}</div></div>
-      <div class="ii full"><div class="il">Citation</div><div class="iv" style="font-style:italic">${s(c.citation)}</div></div>
-    </div></div>
-    <div class="msec"><h4>Motivation</h4><div class="ig">
-      <div class="ii full"><div class="il">Pourquoi participer ?</div><div class="iv">${s(c.motivation1)}</div></div>
-      <div class="ii full"><div class="il">Image à représenter</div><div class="iv">${s(c.motivation2)}</div></div>
-    </div></div>
-    ${c.signature?`<div class="msec"><h4>Signature</h4><img src="${c.signature}" class="msig"></div>`:''}`;
+  <div class="msec"><h4>Informations personnelles</h4><div class="ig">
+    <div class="ii"><div class="il">Date naissance</div><div class="iv">${sv(c.date_naissance)}</div></div>
+    <div class="ii"><div class="il">Âge</div><div class="iv">${c.age?c.age+' ans':sv(null)}</div></div>
+    <div class="ii"><div class="il">Lieu naissance</div><div class="iv">${sv(c.lieu_naissance)}</div></div>
+    <div class="ii"><div class="il">Nationalité</div><div class="iv">${sv(c.nationalite)}</div></div>
+    <div class="ii"><div class="il">Téléphone</div><div class="iv">${sv(c.telephone)}</div></div>
+    <div class="ii"><div class="il">Email</div><div class="iv">${sv(c.email)}</div></div>
+    <div class="ii full"><div class="il">Adresse</div><div class="iv">${sv(c.adresse)}</div></div>
+  </div></div>
+  <div class="msec"><h4>Parcours académique</h4><div class="ig">
+    <div class="ii"><div class="il">Niveau</div><div class="iv">${sv(c.niveau)}</div></div>
+    <div class="ii"><div class="il">Filière</div><div class="iv">${sv(c.filiere)}</div></div>
+    <div class="ii full"><div class="il">Matricule</div><div class="iv">${sv(c.matricule)}</div></div>
+  </div></div>
+  <div class="msec"><h4>Fiche physique</h4><div class="ig">
+    <div class="ii"><div class="il">Taille</div><div class="iv">${sv(c.taille)}</div></div>
+    <div class="ii"><div class="il">Poids</div><div class="iv">${sv(c.poids)}</div></div>
+    <div class="ii"><div class="il">Style</div><div class="iv">${sv(c.style_vestimentaire)}</div></div>
+    <div class="ii"><div class="il">Sport préféré</div><div class="iv">${sv(c.sport_prefere)}</div></div>
+  </div></div>
+  <div class="msec"><h4>Personnalité</h4><div class="ig">
+    <div class="ii full"><div class="il">Loisirs</div><div class="iv">${sv(c.loisirs)}</div></div>
+    <div class="ii full"><div class="il">Langues</div><div class="iv">${sv(c.langues)}</div></div>
+    <div class="ii full"><div class="il">Qualités</div><div class="iv">${sv(c.qualites)}</div></div>
+    <div class="ii full"><div class="il">Défauts</div><div class="iv">${sv(c.defauts)}</div></div>
+    <div class="ii full"><div class="il">Citation</div><div class="iv" style="font-style:italic">${sv(c.citation)}</div></div>
+  </div></div>
+  <div class="msec"><h4>Motivation</h4><div class="ig">
+    <div class="ii full"><div class="il">Pourquoi participer ?</div><div class="iv">${sv(c.motivation1)}</div></div>
+    <div class="ii full"><div class="il">Image à représenter</div><div class="iv">${sv(c.motivation2)}</div></div>
+  </div></div>`;
 }
 
-// PDF
-function exportOnePDF(){ if(curCand) genPDF([curCand]); }
-function expOne(id){ const c=allCandidats.find(x=>x.id===id); if(c) genPDF([c]); }
-function exportAllPDF(){ genPDF(filtered); }
+// ══ PDF ══
+function exportOnePDF(){ if(curCand) genPDF([curCand],`fiche_${curCand.nom}_${curCand.prenoms}.pdf`); }
+function expOne(id){ const c=allCandidats.find(x=>x.id===id); if(c) genPDF([c],`fiche_${c.nom}_${c.prenoms}.pdf`); }
+function exportPDF(type){
+  let cands,fname;
+  if(type==='Miss'){ cands=allCandidats.filter(c=>c.concours_type==='Miss'); fname='fiches_miss_cours_sonou.pdf'; }
+  else if(type==='Mister'){ cands=allCandidats.filter(c=>c.concours_type==='Mister'); fname='fiches_mister_cours_sonou.pdf'; }
+  else { cands=allCandidats; fname='tous_candidats_cours_sonou.pdf'; }
+  if(!cands.length){ toast('❌ Aucun candidat à exporter'); return; }
+  genPDF(cands,fname);
+}
 
-function genPDF(cands) {
-  if (!cands.length){ toast('❌ Aucun candidat à exporter'); return; }
+function genPDF(cands,fname){
   toast('⏳ Génération PDF...');
-  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210, M=15, TW=W-2*M;
-  const navy=[13,27,62], gold=[201,168,76], white=[255,255,255], gray=[100,100,100], light=[245,242,235];
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=15,TW=W-2*M;
+  const navy=[11,23,48],green=[39,164,104],white=[255,255,255],gray=[120,120,120],dark=[30,40,30],light=[240,248,244];
 
-  cands.forEach((c,idx) => {
+  cands.forEach((c,idx)=>{
     if(idx>0) doc.addPage();
-    doc.setFillColor(...navy); doc.rect(0,0,W,42,'F');
-    doc.setFillColor(...gold); doc.rect(0,40,W,1.5,'F');
-    doc.setTextColor(...gold); doc.setFont('helvetica','bold'); doc.setFontSize(17);
-    doc.text('MISS & MISTER DES COURS SONOU', W/2, 15, {align:'center'});
-    doc.setFontSize(8.5); doc.setFont('helvetica','normal');
-    doc.setTextColor(190,190,190);
-    doc.text('Institut Les Cours Sonou — Site Calavi', W/2, 22, {align:'center'});
-    const isMiss = c.concours_type==='Miss';
-    doc.setFillColor(...(isMiss?[192,96,144]:[64,112,192]));
-    doc.roundedRect(W/2-16,27,32,8,2,2,'F');
-    doc.setTextColor(...white); doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text(c.concours_type.toUpperCase(), W/2, 32.5, {align:'center'});
-
+    doc.setFillColor(...dark); doc.rect(0,0,W,44,'F');
+    doc.setFillColor(...green); doc.rect(0,42,W,2,'F');
+    doc.setTextColor(...green); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('MISS & MISTER DES COURS SONOU',W/2,15,{align:'center'});
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.setTextColor(150,180,160);
+    doc.text('Institut Les Cours Sonou — Site Calavi',W/2,23,{align:'center'});
+    const isMiss=c.concours_type==='Miss';
+    doc.setFillColor(...(isMiss?[176,80,128]:[46,107,192]));
+    doc.roundedRect(W/2-18,29,36,10,3,3,'F');
+    doc.setTextColor(...white); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+    doc.text(c.concours_type.toUpperCase(),W/2,35.5,{align:'center'});
     doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(`N° ${String(c.id).padStart(3,'0')}`, M, 50);
+    doc.text(`N° ${String(c.id).padStart(3,'0')}`,M,52);
     doc.setTextColor(...navy); doc.setFontSize(15); doc.setFont('helvetica','bold');
-    doc.text(`${c.nom} ${c.prenoms}`, M, 58);
-
-    if (c.photo&&c.photo.startsWith('data:image')) {
-      try{ doc.addImage(c.photo,'JPEG',W-M-28,44,28,34); }catch(e){}
-    } else {
-      doc.setFillColor(220,220,220); doc.rect(W-M-28,44,28,34,'F');
-    }
-
-    let y=68;
+    doc.text(`${c.nom} ${c.prenoms}`,M,60);
+    if(c.photo&&c.photo.startsWith('data:image')){ try{ doc.addImage(c.photo,'JPEG',W-M-30,46,30,36); }catch(e){} }
+    else { doc.setFillColor(220,230,225); doc.rect(W-M-30,46,30,36,'F'); }
+    let y=70;
     const sec=(title,items)=>{
       y+=5;
       doc.setFillColor(...light); doc.rect(M,y,TW,7,'F');
-      doc.setFillColor(...gold); doc.rect(M,y,2.5,7,'F');
+      doc.setFillColor(...green); doc.rect(M,y,3,7,'F');
       doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-      doc.text(title.toUpperCase(), M+6, y+4.8);
-      y+=10;
+      doc.text(title.toUpperCase(),M+7,y+4.8); y+=10;
       const half=Math.ceil(items.length/2);
       items.forEach((it,i)=>{
-        const col=i<half?0:1;
-        const row=i<half?i:i-half;
-        const x=M+col*(TW/2);
-        const yy=y+row*10;
+        const col=i<half?0:1, row=i<half?i:i-half;
+        const x=M+col*(TW/2), yy=y+row*10;
         doc.setTextColor(...gray); doc.setFontSize(7); doc.setFont('helvetica','normal');
-        doc.text(it.label, x, yy);
-        doc.setTextColor(...navy); doc.setFontSize(8); doc.setFont('helvetica','bold');
-        const val=(it.val||'—').substring(0,36);
-        doc.text(val, x, yy+4.5);
+        doc.text(it.label,x,yy);
+        doc.setTextColor(...navy); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+        doc.text((it.val||'—').toString().substring(0,34),x,yy+4.5);
       });
       y+=Math.ceil(items.length/2)*10+2;
     };
-
     sec('Informations Personnelles',[
       {label:'Date de naissance',val:c.date_naissance},{label:'Âge',val:c.age?c.age+' ans':'—'},
       {label:'Nationalité',val:c.nationalite},{label:'Lieu de naissance',val:c.lieu_naissance},
@@ -891,44 +1238,103 @@ function genPDF(cands) {
       {label:'Taille',val:c.taille},{label:'Poids',val:c.poids},
       {label:'Style vestimentaire',val:c.style_vestimentaire},{label:'Sport préféré',val:c.sport_prefere},
     ]);
-
+    sec('Personnalité',[
+      {label:'Loisirs',val:c.loisirs},{label:'Langues',val:c.langues},
+      {label:'Qualités',val:c.qualites},{label:'Défauts',val:c.defauts},
+    ]);
     if(c.motivation1){
       y+=4;
       doc.setFillColor(...light); doc.rect(M,y,TW,7,'F');
-      doc.setFillColor(...gold); doc.rect(M,y,2.5,7,'F');
+      doc.setFillColor(...green); doc.rect(M,y,3,7,'F');
       doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-      doc.text('MOTIVATION', M+6, y+4.8); y+=10;
-      doc.setTextColor(60,60,60); doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.splitTextToSize(c.motivation1,TW).slice(0,4).forEach(l=>{doc.text(l,M,y);y+=5;});
+      doc.text('MOTIVATION',M+7,y+4.8); y+=10;
+      doc.setTextColor(50,50,50); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.splitTextToSize(c.motivation1,TW).slice(0,5).forEach(l=>{doc.text(l,M,y);y+=5;});
     }
-
-    if(c.signature){
-      try{
-        y+=4;
-        doc.setFillColor(...light); doc.rect(M,y,TW,7,'F');
-        doc.setFillColor(...gold); doc.rect(M,y,2.5,7,'F');
-        doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-        doc.text('SIGNATURE', M+6, y+4.8); y+=10;
-        doc.addImage(c.signature,'PNG',M,y,60,18);
-      }catch(e){}
-    }
-
-    doc.setFillColor(...navy); doc.rect(0,287,W,10,'F');
-    doc.setTextColor(...gold); doc.setFontSize(7);
-    doc.text('Institut Les Cours Sonou — Formulaire Officiel de Candidature', W/2, 293, {align:'center'});
+    doc.setFillColor(...dark); doc.rect(0,287,W,10,'F');
+    doc.setTextColor(...green); doc.setFontSize(7);
+    doc.text('Institut Les Cours Sonou — Formulaire Officiel de Candidature',W/2,293,{align:'center'});
   });
-
-  const fname = cands.length===1?`fiche_${cands[0].nom}_${cands[0].prenoms}.pdf`:`liste_candidats_cours_sonou.pdf`;
   doc.save(fname);
   toast(`✅ PDF généré — ${cands.length} fiche(s)`);
 }
 
-// DELETE
-let pendingDel = null;
+// ══ EDIT ══
+let editId = null;
+function openEdit(id) {
+  const c = allCandidats.find(x=>x.id===id); if(!c) return;
+  editId = id;
+  const ef = (lbl, key, full=false, type='text', opts=null) => {
+    const val = (c[key]||'').toString();
+    const selOpts = opts ? opts.map(o=>`<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('') : '';
+    const input = opts
+      ? `<select id="ef_${key}" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);width:100%;outline:none"><option value="">— Sélectionner —</option>${selOpts}</select>`
+      : type==='textarea'
+        ? `<textarea id="ef_${key}" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);width:100%;min-height:80px;resize:vertical;outline:none">${val}</textarea>`
+        : `<input type="${type}" id="ef_${key}" value="${val.replace(/"/g,'&quot;')}" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);width:100%;outline:none">`;
+    return `<div class="${full?'full':''}"><label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;display:block;margin-bottom:5px">${lbl}</label>${input}</div>`;
+  };
+  document.getElementById('editBody').innerHTML = `
+    <div class="edit-sec">Informations Personnelles</div>
+    ${ef('Nom','nom')} ${ef('Prénoms','prenoms')}
+    ${ef('Date naissance (JJ/MM/AAAA)','date_naissance')} ${ef('Nationalité','nationalite')}
+    ${ef('Téléphone','telephone')} ${ef('Email','email',false,'email')}
+    ${ef('Adresse','adresse',true)} ${ef('Lieu de naissance','lieu_naissance')}
+    <div class="edit-sec">Parcours Académique</div>
+    ${ef('Niveau','niveau',false,'text',['Licence 1','Licence 2','Licence 3','Master 1','Master 2','BTS','DUT','Autre'])}
+    ${ef('Filière','filiere')} ${ef('Matricule','matricule')}
+    <div class="edit-sec">Fiche Physique</div>
+    ${ef('Taille (m)','taille')} ${ef('Poids (kg)','poids')}
+    ${ef('Style vestimentaire','style_vestimentaire')} ${ef('Sport préféré','sport_prefere')}
+    <div class="edit-sec">Personnalité</div>
+    ${ef('Loisirs','loisirs',true)} ${ef('Langues','langues',true)}
+    ${ef('Qualités','qualites',true)} ${ef('Défauts','defauts',true)}
+    ${ef('Citation','citation',true,'textarea')}
+    <div class="edit-sec">Motivation</div>
+    ${ef('Motivation principale','motivation1',true,'textarea')}
+    ${ef('Image à représenter','motivation2',true,'textarea')}
+  `;
+  document.getElementById('editOv').classList.add('show');
+}
+
+function closeEdit() { document.getElementById('editOv').classList.remove('show'); editId=null; }
+
+async function saveEdit() {
+  if(!editId) return;
+  const btn = document.getElementById('btnSave');
+  btn.disabled=true; btn.textContent='⏳ Enregistrement...';
+  const gv = id => (document.getElementById(id)?.value||'').trim();
+  const updates = {
+    nom:gv('ef_nom'), prenoms:gv('ef_prenoms'), date_naissance:gv('ef_date_naissance'),
+    nationalite:gv('ef_nationalite'), telephone:gv('ef_telephone'), email:gv('ef_email'),
+    adresse:gv('ef_adresse'), lieu_naissance:gv('ef_lieu_naissance'),
+    niveau:gv('ef_niveau'), filiere:gv('ef_filiere'), matricule:gv('ef_matricule'),
+    taille:gv('ef_taille'), poids:gv('ef_poids'),
+    style_vestimentaire:gv('ef_style_vestimentaire'), sport_prefere:gv('ef_sport_prefere'),
+    loisirs:gv('ef_loisirs'), langues:gv('ef_langues'),
+    qualites:gv('ef_qualites'), defauts:gv('ef_defauts'),
+    citation:gv('ef_citation'), motivation1:gv('ef_motivation1'), motivation2:gv('ef_motivation2'),
+  };
+  try {
+    const { error } = await db.from('candidats').update(updates).eq('id', editId);
+    if(error) throw new Error(error.message||JSON.stringify(error));
+    // Update local data
+    const idx = allCandidats.findIndex(x=>x.id===editId);
+    if(idx>=0) allCandidats[idx] = { ...allCandidats[idx], ...updates };
+    filterCandidats(); updateStats();
+    closeEdit(); toast('✅ Candidat mis à jour !');
+  } catch(err) {
+    toast('❌ '+(err.message||'Erreur')); 
+    btn.disabled=false; btn.textContent='💾 Enregistrer les modifications';
+  }
+}
+
+
+let pendingDel=null;
 function confirmDel(id){
   pendingDel=id;
   document.getElementById('cov').classList.add('show');
-  document.getElementById('delBtn').onclick = async()=>{
+  document.getElementById('delBtn').onclick=async()=>{
     document.getElementById('cov').classList.remove('show');
     await db.from('candidats').delete().eq('id',pendingDel);
     allCandidats=allCandidats.filter(c=>c.id!==pendingDel);
@@ -937,16 +1343,12 @@ function confirmDel(id){
   };
 }
 
-// SIDEBAR
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 
-// TOAST
-function toast(msg, color='') {
+function toast(msg){
   const t=document.getElementById('tst');
-  t.textContent=msg;
-  if(color) t.style.borderColor=color; else t.style.borderColor='rgba(201,168,76,.3)';
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3200);
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3400);
 }
 
 // Auto date

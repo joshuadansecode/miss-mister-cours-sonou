@@ -827,6 +827,20 @@
       transform: translateX(0);
     }
 
+    /* Overlay pour fermer le menu sur mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      z-index: 45;
+      backdrop-filter: blur(2px);
+    }
+
+    .sidebar.open~.sidebar-overlay {
+      display: block;
+    }
+
     @media(min-width:900px) {
       .sidebar {
         transform: translateX(0)
@@ -834,6 +848,10 @@
 
       .amain {
         margin-left: var(--sidebar)
+      }
+
+      .sidebar-overlay {
+        display: none !important;
       }
     }
 
@@ -2309,6 +2327,9 @@
       </div>
     </aside>
 
+    <!-- Overlay pour fermer le menu sur mobile -->
+    <div class="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+
     <div class="amain">
       <div class="topbar">
         <button class="mnu-btn" onclick="toggleSidebar()">☰</button>
@@ -2517,7 +2538,14 @@
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { jsPDF } = window.jspdf;
+
+    // Charger jsPDF de manière sécurisée
+    let jsPDF = null;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDF = window.jspdf.jsPDF;
+    } else {
+      console.warn('jsPDF non chargé - les exports PDF ne fonctionneront pas');
+    }
 
     let concours_type = '', photoB64 = '';
     let allCandidats = [], filtered = [], curView = 'all', curCand = null;
@@ -2557,6 +2585,11 @@
       }
     }
     function adminLogout() {
+      // Fermer le menu sur mobile
+      if (window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
       sessionStorage.removeItem('adminOk');
       goPage('form');
       toast('🔒 Déconnecté du dashboard');
@@ -2732,6 +2765,11 @@
 
     // ══ ADMIN DATA ══
     async function loadCandidats() {
+      // Fermer le menu sur mobile
+      if (window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
       document.getElementById('gridArea').innerHTML = '<div class="ldr"><div class="spin">⏳</div><br>Chargement...</div>';
       try {
         const { data, error } = await db.from('candidats').select('*').order('created_at', { ascending: false });
@@ -2763,6 +2801,12 @@
       document.querySelectorAll('.nb')[map[view]].classList.add('active');
       document.getElementById('pill-' + { all: 'all', Miss: 'miss', Mister: 'mister' }[view]).classList.add('active');
       document.getElementById('topTitle').textContent = view === 'all' ? 'Tous les candidats' : view === 'Miss' ? 'Candidates Miss' : 'Candidats Mister';
+
+      // Fermer le menu sur mobile après sélection
+      if (window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
       filterCandidats();
     }
 
@@ -2858,6 +2902,11 @@
     function exportOnePDF() { if (curCand) genPDF([curCand], `fiche_${curCand.nom}_${curCand.prenoms}.pdf`); }
     function expOne(id) { const c = allCandidats.find(x => x.id === id); if (c) genPDF([c], `fiche_${c.nom}_${c.prenoms}.pdf`); }
     function exportPDF(type) {
+      // Fermer le menu sur mobile
+      if (window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
       let cands, fname;
       if (type === 'Miss') { cands = allCandidats.filter(c => c.concours_type === 'Miss'); fname = 'fiches_miss_cours_sonou.pdf'; }
       else if (type === 'Mister') { cands = allCandidats.filter(c => c.concours_type === 'Mister'); fname = 'fiches_mister_cours_sonou.pdf'; }
@@ -3042,6 +3091,11 @@
 
     // ══ TABLE PRINT ══
     function openTablePrintModal() {
+      // Fermer le menu sur mobile
+      if (window.innerWidth < 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
       document.getElementById('tablePrintModal').classList.add('show');
     }
 

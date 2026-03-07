@@ -343,7 +343,7 @@
     .fwrap {
       max-width: 720px;
       margin: 0 auto;
-      padding: 24px 20px 110px;
+      padding: 24px 20px 140px;
     }
 
     /* ══════════════ SECTION CARD ══════════════ */
@@ -1068,7 +1068,7 @@
 
     /* ══════ STATS ══════ */
     .acontent {
-      padding: 22px 24px;
+      padding: 22px 24px 120px;
       flex: 1;
     }
 
@@ -2014,7 +2014,7 @@
       }
 
       .acontent {
-        padding: 14px 14px
+        padding: 14px 14px 120px
       }
 
       .topbar {
@@ -2565,12 +2565,18 @@
     let allCandidats = [], filtered = [], curView = 'all', curCand = null;
 
     // ══ NAVIGATION ══
+    let currentPage = 'form';
+
     function goPage(p) {
+      currentPage = p;
       document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
       document.querySelectorAll('.app-nav button').forEach(x => x.classList.remove('active'));
       document.getElementById('page-' + p).classList.add('active');
       document.getElementById('nav-' + p).classList.add('active');
       if (p === 'admin') loadCandidats();
+
+      // Ajouter à l'historique
+      history.pushState({ page: p }, '', '#' + p);
     }
 
     // ══ ADMIN LOGIN ══
@@ -3240,6 +3246,24 @@
     document.getElementById('sig_j').value = String(nd.getDate()).padStart(2, '0');
     document.getElementById('sig_m').value = String(nd.getMonth() + 1).padStart(2, '0');
     document.getElementById('sig_a').value = nd.getFullYear();
+
+    // Gérer le bouton retour pour éviter de quitter le site
+    window.addEventListener('popstate', function (event) {
+      if (event.state && event.state.page) {
+        const p = event.state.page;
+        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.app-nav button').forEach(x => x.classList.remove('active'));
+        document.getElementById('page-' + p).classList.add('active');
+        document.getElementById('nav-' + p).classList.add('active');
+        currentPage = p;
+      } else {
+        // Si on est au début de l'historique, rester sur la page form
+        history.pushState({ page: 'form' }, '', '#form');
+      }
+    });
+
+    // Initialiser l'historique
+    history.replaceState({ page: 'form' }, '', '#form');
   </script>
 </body>
 

@@ -9,8 +9,38 @@
     href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- Charger jsPDF depuis unpkg avec fallback -->
+  <script>
+    // Fonction pour charger jsPDF dynamiquement
+    window.loadJsPDF = function () {
+      return new Promise((resolve, reject) => {
+        if (window.jspdf && window.jspdf.jsPDF) {
+          resolve(window.jspdf.jsPDF);
+          return;
+        }
+
+        const script1 = document.createElement('script');
+        script1.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        script1.onload = () => {
+          const script2 = document.createElement('script');
+          script2.src = 'https://unpkg.com/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js';
+          script2.onload = () => {
+            if (window.jspdf && window.jspdf.jsPDF) {
+              resolve(window.jspdf.jsPDF);
+            } else {
+              reject(new Error('jsPDF non disponible'));
+            }
+          };
+          script2.onerror = () => reject(new Error('Erreur chargement autotable'));
+          document.head.appendChild(script2);
+        };
+        script1.onerror = () => reject(new Error('Erreur chargement jsPDF'));
+        document.head.appendChild(script1);
+      });
+    };
+  </script>
+
   <style>
     /* ══════════════ VARIABLES ══════════════ */
     :root {
@@ -2539,28 +2569,6 @@
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Charger jsPDF de manière sécurisée avec retry
-    let jsPDF = null;
-
-    function initJsPDF() {
-      if (window.jspdf && window.jspdf.jsPDF) {
-        jsPDF = window.jspdf.jsPDF;
-        console.log('✅ jsPDF chargé avec succès');
-        return true;
-      }
-      return false;
-    }
-
-    // Essayer de charger immédiatement
-    if (!initJsPDF()) {
-      // Si pas encore chargé, attendre un peu et réessayer
-      setTimeout(() => {
-        if (!initJsPDF()) {
-          console.warn('⚠️ jsPDF non chargé après 1s');
-        }
-      }, 1000);
-    }
-
     let concours_type = '', photoB64 = '';
     let allCandidats = [], filtered = [], curView = 'all', curCand = null;
 
@@ -2935,92 +2943,91 @@
       genPDF(cands, fname);
     }
 
-    function genPDF(cands, fname) {
-      // Réessayer de charger jsPDF si pas encore fait
-      if (!jsPDF) {
-        initJsPDF();
+    async function genPDF(cands, fname) {
+      toast('⏳ Chargement PDF...');
+
+      try {
+        // Charger jsPDF dynamiquement
+        const jsPDFClass = await window.loadJsPDF();
+
+        toast('⏳ Génération PDF...');
+        const doc = new jsPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const W = 210, M = 15, TW = W - 2 * M;
+        const navy = [11, 23, 48], green = [39, 164, 104], white = [255, 255, 255], gray = [120, 120, 120], dark = [30, 40, 30], light = [240, 248, 244];
+
+        cands.forEach((c, idx) => {
+          if (idx > 0) doc.addPage();
+          doc.setFillColor(...dark); doc.rect(0, 0, W, 44, 'F');
+          doc.setFillColor(...green); doc.rect(0, 42, W, 2, 'F');
+          doc.setTextColor(...green); doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+          doc.text('MISS & MISTER DES COURS SONOU', W / 2, 15, { align: 'center' });
+          doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+          doc.setTextColor(150, 180, 160);
+          doc.text('Institut Les Cours Sonou — Site Calavi', W / 2, 23, { align: 'center' });
+          const isMiss = c.concours_type === 'Miss';
+          doc.setFillColor(...(isMiss ? [176, 80, 128] : [46, 107, 192]));
+          doc.roundedRect(W / 2 - 18, 29, 36, 10, 3, 3, 'F');
+          doc.setTextColor(...white); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+          doc.text(c.concours_type.toUpperCase(), W / 2, 35.5, { align: 'center' });
+          doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+          doc.text(`N° ${String(c.id).padStart(3, '0')}`, M, 52);
+          doc.setTextColor(...navy); doc.setFontSize(15); doc.setFont('helvetica', 'bold');
+          doc.text(`${c.nom} ${c.prenoms}`, M, 60);
+          if (c.photo && c.photo.startsWith('data:image')) { try { doc.addImage(c.photo, 'JPEG', W - M - 30, 46, 30, 36); } catch (e) { } }
+          else { doc.setFillColor(220, 230, 225); doc.rect(W - M - 30, 46, 30, 36, 'F'); }
+          let y = 70;
+          const sec = (title, items) => {
+            y += 5;
+            doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
+            doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
+            doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+            doc.text(title.toUpperCase(), M + 7, y + 4.8); y += 10;
+            const half = Math.ceil(items.length / 2);
+            items.forEach((it, i) => {
+              const col = i < half ? 0 : 1, row = i < half ? i : i - half;
+              const x = M + col * (TW / 2), yy = y + row * 10;
+              doc.setTextColor(...gray); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+              doc.text(it.label, x, yy);
+              doc.setTextColor(...navy); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+              doc.text((it.val || '—').toString().substring(0, 34), x, yy + 4.5);
+            });
+            y += Math.ceil(items.length / 2) * 10 + 2;
+          };
+          sec('Informations Personnelles', [
+            { label: 'Date de naissance', val: c.date_naissance }, { label: 'Âge', val: c.age ? c.age + ' ans' : '—' },
+            { label: 'Nationalité', val: c.nationalite }, { label: 'Lieu de naissance', val: c.lieu_naissance },
+            { label: 'Téléphone', val: c.telephone }, { label: 'Email', val: c.email },
+          ]);
+          sec('Parcours Académique', [
+            { label: 'Niveau', val: c.niveau }, { label: 'Filière', val: c.filiere }, { label: 'Matricule', val: c.matricule },
+          ]);
+          sec('Fiche Physique', [
+            { label: 'Taille', val: c.taille }, { label: 'Poids', val: c.poids },
+            { label: 'Style vestimentaire', val: c.style_vestimentaire }, { label: 'Sport préféré', val: c.sport_prefere },
+          ]);
+          sec('Personnalité', [
+            { label: 'Loisirs', val: c.loisirs }, { label: 'Langues', val: c.langues },
+            { label: 'Qualités', val: c.qualites }, { label: 'Défauts', val: c.defauts },
+          ]);
+          if (c.motivation1) {
+            y += 4;
+            doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
+            doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
+            doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+            doc.text('MOTIVATION', M + 7, y + 4.8); y += 10;
+            doc.setTextColor(50, 50, 50); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+            doc.splitTextToSize(c.motivation1, TW).slice(0, 5).forEach(l => { doc.text(l, M, y); y += 5; });
+          }
+          doc.setFillColor(...dark); doc.rect(0, 287, W, 10, 'F');
+          doc.setTextColor(...green); doc.setFontSize(7);
+          doc.text('Institut Les Cours Sonou — Formulaire Officiel de Candidature', W / 2, 293, { align: 'center' });
+        });
+        doc.save(fname);
+        toast(`✅ PDF généré — ${cands.length} fiche(s)`);
+      } catch (error) {
+        console.error('Erreur génération PDF:', error);
+        toast('❌ Erreur: Impossible de générer le PDF. Vérifiez votre connexion.');
       }
-
-      if (!jsPDF) {
-        toast('❌ Erreur: jsPDF non chargé. Rechargez la page.');
-        console.error('jsPDF non disponible. Vérifiez votre connexion internet.');
-        return;
-      }
-
-      toast('⏳ Génération PDF...');
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const W = 210, M = 15, TW = W - 2 * M;
-      const navy = [11, 23, 48], green = [39, 164, 104], white = [255, 255, 255], gray = [120, 120, 120], dark = [30, 40, 30], light = [240, 248, 244];
-
-      cands.forEach((c, idx) => {
-        if (idx > 0) doc.addPage();
-        doc.setFillColor(...dark); doc.rect(0, 0, W, 44, 'F');
-        doc.setFillColor(...green); doc.rect(0, 42, W, 2, 'F');
-        doc.setTextColor(...green); doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-        doc.text('MISS & MISTER DES COURS SONOU', W / 2, 15, { align: 'center' });
-        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-        doc.setTextColor(150, 180, 160);
-        doc.text('Institut Les Cours Sonou — Site Calavi', W / 2, 23, { align: 'center' });
-        const isMiss = c.concours_type === 'Miss';
-        doc.setFillColor(...(isMiss ? [176, 80, 128] : [46, 107, 192]));
-        doc.roundedRect(W / 2 - 18, 29, 36, 10, 3, 3, 'F');
-        doc.setTextColor(...white); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
-        doc.text(c.concours_type.toUpperCase(), W / 2, 35.5, { align: 'center' });
-        doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-        doc.text(`N° ${String(c.id).padStart(3, '0')}`, M, 52);
-        doc.setTextColor(...navy); doc.setFontSize(15); doc.setFont('helvetica', 'bold');
-        doc.text(`${c.nom} ${c.prenoms}`, M, 60);
-        if (c.photo && c.photo.startsWith('data:image')) { try { doc.addImage(c.photo, 'JPEG', W - M - 30, 46, 30, 36); } catch (e) { } }
-        else { doc.setFillColor(220, 230, 225); doc.rect(W - M - 30, 46, 30, 36, 'F'); }
-        let y = 70;
-        const sec = (title, items) => {
-          y += 5;
-          doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
-          doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
-          doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-          doc.text(title.toUpperCase(), M + 7, y + 4.8); y += 10;
-          const half = Math.ceil(items.length / 2);
-          items.forEach((it, i) => {
-            const col = i < half ? 0 : 1, row = i < half ? i : i - half;
-            const x = M + col * (TW / 2), yy = y + row * 10;
-            doc.setTextColor(...gray); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-            doc.text(it.label, x, yy);
-            doc.setTextColor(...navy); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
-            doc.text((it.val || '—').toString().substring(0, 34), x, yy + 4.5);
-          });
-          y += Math.ceil(items.length / 2) * 10 + 2;
-        };
-        sec('Informations Personnelles', [
-          { label: 'Date de naissance', val: c.date_naissance }, { label: 'Âge', val: c.age ? c.age + ' ans' : '—' },
-          { label: 'Nationalité', val: c.nationalite }, { label: 'Lieu de naissance', val: c.lieu_naissance },
-          { label: 'Téléphone', val: c.telephone }, { label: 'Email', val: c.email },
-        ]);
-        sec('Parcours Académique', [
-          { label: 'Niveau', val: c.niveau }, { label: 'Filière', val: c.filiere }, { label: 'Matricule', val: c.matricule },
-        ]);
-        sec('Fiche Physique', [
-          { label: 'Taille', val: c.taille }, { label: 'Poids', val: c.poids },
-          { label: 'Style vestimentaire', val: c.style_vestimentaire }, { label: 'Sport préféré', val: c.sport_prefere },
-        ]);
-        sec('Personnalité', [
-          { label: 'Loisirs', val: c.loisirs }, { label: 'Langues', val: c.langues },
-          { label: 'Qualités', val: c.qualites }, { label: 'Défauts', val: c.defauts },
-        ]);
-        if (c.motivation1) {
-          y += 4;
-          doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
-          doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
-          doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-          doc.text('MOTIVATION', M + 7, y + 4.8); y += 10;
-          doc.setTextColor(50, 50, 50); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-          doc.splitTextToSize(c.motivation1, TW).slice(0, 5).forEach(l => { doc.text(l, M, y); y += 5; });
-        }
-        doc.setFillColor(...dark); doc.rect(0, 287, W, 10, 'F');
-        doc.setTextColor(...green); doc.setFontSize(7);
-        doc.text('Institut Les Cours Sonou — Formulaire Officiel de Candidature', W / 2, 293, { align: 'center' });
-      });
-      doc.save(fname);
-      toast(`✅ PDF généré — ${cands.length} fiche(s)`);
     }
 
     // ══ EDIT ══

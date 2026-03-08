@@ -62,6 +62,10 @@ CREATE POLICY "Insert public" ON candidats
 CREATE POLICY "Read all" ON candidats
   FOR SELECT USING (true);
 
+-- Permettre la mise à jour (admin)
+CREATE POLICY "Update all" ON candidats
+  FOR UPDATE USING (true);
+
 -- Permettre la suppression (admin)
 CREATE POLICY "Delete all" ON candidats
   FOR DELETE USING (true);

@@ -3087,14 +3087,18 @@
         citation: gv('ef_citation'), motivation1: gv('ef_motivation1'), motivation2: gv('ef_motivation2'),
       };
       try {
-        const { error } = await db.from('candidats').update(updates).eq('id', editId);
+        const { data, error } = await db.from('candidats').update(updates).eq('id', editId).select();
         if (error) throw new Error(error.message || JSON.stringify(error));
-        // Update local data
-        const idx = allCandidats.findIndex(x => x.id === editId);
-        if (idx >= 0) allCandidats[idx] = { ...allCandidats[idx], ...updates };
-        filterCandidats(); updateStats();
-        closeEdit(); toast('✅ Candidat mis à jour !');
+
+        console.log('Mise à jour réussie:', data);
+
+        // Recharger tous les candidats depuis la base de données
+        await loadCandidats();
+
+        closeEdit();
+        toast('✅ Candidat mis à jour !');
       } catch (err) {
+        console.error('Erreur mise à jour:', err);
         toast('❌ ' + (err.message || 'Erreur'));
         btn.disabled = false; btn.textContent = '💾 Enregistrer les modifications';
       }

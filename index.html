@@ -2067,6 +2067,12 @@
         flex: 1;
         justify-content: center
       }
+
+      /* Limiter à 2 colonnes sur mobile */
+      .cgrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
     }
 
     #choosePrompt {
@@ -2856,10 +2862,15 @@
       filtered.forEach((c, i) => {
         const num = String(c.id || i + 1).padStart(3, '0');
         const isMiss = c.concours_type === 'Miss';
+
+        // Générer les initiales
+        const initiales = ((c.nom || '').charAt(0) + (c.prenoms || '').charAt(0)).toUpperCase();
+        const avatarBg = isMiss ? '#E06090' : '#5090E0';
+
         const card = document.createElement('div'); card.className = 'cc';
         card.innerHTML = `
       <div class="cp">
-        ${c.photo ? `<img src="${c.photo}" alt="">` : (isMiss ? '👸' : '🤴')}
+        ${c.photo ? `<img src="${c.photo}" alt="">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${avatarBg};color:#fff;font-size:48px;font-weight:700;">${initiales}</div>`}
         <span class="cbdg ${isMiss ? 'bdg-m' : 'bdg-mr'}">${c.concours_type}</span>
       </div>
       <div class="cinfo">
@@ -2967,31 +2978,31 @@
           const isMiss = c.concours_type === 'Miss';
           doc.setFillColor(...(isMiss ? [176, 80, 128] : [46, 107, 192]));
           doc.roundedRect(W / 2 - 18, 29, 36, 10, 3, 3, 'F');
-          doc.setTextColor(...white); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...white); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
           doc.text(c.concours_type.toUpperCase(), W / 2, 35.5, { align: 'center' });
-          doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...gray); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
           doc.text(`N° ${String(c.id).padStart(3, '0')}`, M, 52);
-          doc.setTextColor(...navy); doc.setFontSize(15); doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...navy); doc.setFontSize(18); doc.setFont('helvetica', 'bold');
           doc.text(`${c.nom} ${c.prenoms}`, M, 60);
           if (c.photo && c.photo.startsWith('data:image')) { try { doc.addImage(c.photo, 'JPEG', W - M - 30, 46, 30, 36); } catch (e) { } }
           else { doc.setFillColor(220, 230, 225); doc.rect(W - M - 30, 46, 30, 36, 'F'); }
           let y = 70;
           const sec = (title, items) => {
             y += 5;
-            doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
-            doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
-            doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-            doc.text(title.toUpperCase(), M + 7, y + 4.8); y += 10;
+            doc.setFillColor(...light); doc.rect(M, y, TW, 8, 'F');
+            doc.setFillColor(...green); doc.rect(M, y, 3, 8, 'F');
+            doc.setTextColor(...navy); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+            doc.text(title.toUpperCase(), M + 7, y + 5.5); y += 12;
             const half = Math.ceil(items.length / 2);
             items.forEach((it, i) => {
               const col = i < half ? 0 : 1, row = i < half ? i : i - half;
-              const x = M + col * (TW / 2), yy = y + row * 10;
-              doc.setTextColor(...gray); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+              const x = M + col * (TW / 2), yy = y + row * 11;
+              doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
               doc.text(it.label, x, yy);
-              doc.setTextColor(...navy); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
-              doc.text((it.val || '—').toString().substring(0, 34), x, yy + 4.5);
+              doc.setTextColor(...navy); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+              doc.text((it.val || '—').toString().substring(0, 34), x, yy + 5);
             });
-            y += Math.ceil(items.length / 2) * 10 + 2;
+            y += Math.ceil(items.length / 2) * 11 + 3;
           };
           sec('Informations Personnelles', [
             { label: 'Date de naissance', val: c.date_naissance }, { label: 'Âge', val: c.age ? c.age + ' ans' : '—' },
@@ -3010,16 +3021,16 @@
             { label: 'Qualités', val: c.qualites }, { label: 'Défauts', val: c.defauts },
           ]);
           if (c.motivation1) {
-            y += 4;
-            doc.setFillColor(...light); doc.rect(M, y, TW, 7, 'F');
-            doc.setFillColor(...green); doc.rect(M, y, 3, 7, 'F');
-            doc.setTextColor(...navy); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-            doc.text('MOTIVATION', M + 7, y + 4.8); y += 10;
-            doc.setTextColor(50, 50, 50); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-            doc.splitTextToSize(c.motivation1, TW).slice(0, 5).forEach(l => { doc.text(l, M, y); y += 5; });
+            y += 5;
+            doc.setFillColor(...light); doc.rect(M, y, TW, 8, 'F');
+            doc.setFillColor(...green); doc.rect(M, y, 3, 8, 'F');
+            doc.setTextColor(...navy); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+            doc.text('MOTIVATION', M + 7, y + 5.5); y += 12;
+            doc.setTextColor(50, 50, 50); doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
+            doc.splitTextToSize(c.motivation1, TW).slice(0, 6).forEach(l => { doc.text(l, M, y); y += 5.5; });
           }
           doc.setFillColor(...dark); doc.rect(0, 287, W, 10, 'F');
-          doc.setTextColor(...green); doc.setFontSize(7);
+          doc.setTextColor(...green); doc.setFontSize(8);
           doc.text('Institut Les Cours Sonou — Formulaire Officiel de Candidature', W / 2, 293, { align: 'center' });
         });
         doc.save(fname);

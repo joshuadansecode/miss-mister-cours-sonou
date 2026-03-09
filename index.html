@@ -2455,7 +2455,7 @@
       <div class="cico">📊</div>
       <h3>Imprimer Tableau</h3>
       <p>Sélectionnez les colonnes à inclure dans le tableau</p>
-      <div style="text-align: left; padding: 10px 0; max-height: 300px; overflow-y: auto;">
+      <div style="text-align: left; padding: 10px 0; max-height: 400px; overflow-y: auto;">
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
           <input type="checkbox" id="col_num" checked style="margin-right: 8px;">N°
         </label>
@@ -2469,13 +2469,25 @@
           <input type="checkbox" id="col_prenoms" checked style="margin-right: 8px;">Prénoms
         </label>
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_date_naissance" style="margin-right: 8px;">Date de naissance
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_age" style="margin-right: 8px;">Âge
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_lieu_naissance" style="margin-right: 8px;">Lieu de naissance
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_nationalite" style="margin-right: 8px;">Nationalité
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_adresse" style="margin-right: 8px;">Adresse
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
           <input type="checkbox" id="col_telephone" checked style="margin-right: 8px;">Téléphone
         </label>
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
           <input type="checkbox" id="col_email" checked style="margin-right: 8px;">Email
-        </label>
-        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
-          <input type="checkbox" id="col_age" style="margin-right: 8px;">Âge
         </label>
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
           <input type="checkbox" id="col_niveau" style="margin-right: 8px;">Niveau
@@ -2487,10 +2499,31 @@
           <input type="checkbox" id="col_matricule" style="margin-right: 8px;">Matricule
         </label>
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
-          <input type="checkbox" id="col_nationalite" style="margin-right: 8px;">Nationalité
+          <input type="checkbox" id="col_taille" style="margin-right: 8px;">Taille
         </label>
         <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
-          <input type="checkbox" id="col_adresse" style="margin-right: 8px;">Adresse
+          <input type="checkbox" id="col_poids" style="margin-right: 8px;">Poids
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_couleur_preferee" style="margin-right: 8px;">Couleur préférée
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_style_vestimentaire" style="margin-right: 8px;">Style vestimentaire
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_sport_prefere" style="margin-right: 8px;">Sport préféré
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_loisirs" style="margin-right: 8px;">Loisirs
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_langues" style="margin-right: 8px;">Langues
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_qualites" style="margin-right: 8px;">Qualités
+        </label>
+        <label style="display: block; padding: 8px; cursor: pointer; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="col_defauts" style="margin-right: 8px;">Défauts
         </label>
       </div>
       <div class="cbtns">
@@ -3007,6 +3040,7 @@
           sec('Informations Personnelles', [
             { label: 'Date de naissance', val: c.date_naissance }, { label: 'Âge', val: c.age ? c.age + ' ans' : '—' },
             { label: 'Nationalité', val: c.nationalite }, { label: 'Lieu de naissance', val: c.lieu_naissance },
+            { label: 'Adresse', val: c.adresse },
             { label: 'Téléphone', val: c.telephone }, { label: 'Email', val: c.email },
           ]);
           sec('Parcours Académique', [
@@ -3014,11 +3048,13 @@
           ]);
           sec('Fiche Physique', [
             { label: 'Taille', val: c.taille }, { label: 'Poids', val: c.poids },
+            { label: 'Couleur préférée', val: c.couleur_preferee },
             { label: 'Style vestimentaire', val: c.style_vestimentaire }, { label: 'Sport préféré', val: c.sport_prefere },
           ]);
           sec('Personnalité', [
             { label: 'Loisirs', val: c.loisirs }, { label: 'Langues', val: c.langues },
             { label: 'Qualités', val: c.qualites }, { label: 'Défauts', val: c.defauts },
+            { label: 'Citation', val: c.citation },
           ]);
           if (c.motivation1) {
             y += 5;
@@ -3027,7 +3063,16 @@
             doc.setTextColor(...navy); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
             doc.text('MOTIVATION', M + 7, y + 5.5); y += 12;
             doc.setTextColor(50, 50, 50); doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
-            doc.splitTextToSize(c.motivation1, TW).slice(0, 6).forEach(l => { doc.text(l, M, y); y += 5.5; });
+            doc.splitTextToSize(c.motivation1, TW).slice(0, 4).forEach(l => { doc.text(l, M, y); y += 5.5; });
+
+            // Motivation 2
+            if (c.motivation2) {
+              y += 3;
+              doc.setTextColor(...gray); doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+              doc.text('Image à représenter:', M, y); y += 6;
+              doc.setTextColor(50, 50, 50); doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
+              doc.splitTextToSize(c.motivation2, TW).slice(0, 3).forEach(l => { doc.text(l, M, y); y += 5.5; });
+            }
           }
           doc.setFillColor(...dark); doc.rect(0, 287, W, 10, 'F');
           doc.setTextColor(...green); doc.setFontSize(8);
@@ -3159,14 +3204,25 @@
         col_type: { label: 'Type', key: 'concours_type' },
         col_nom: { label: 'Nom', key: 'nom' },
         col_prenoms: { label: 'Prénoms', key: 'prenoms' },
+        col_date_naissance: { label: 'Date naissance', key: 'date_naissance' },
+        col_age: { label: 'Âge', key: 'age' },
+        col_lieu_naissance: { label: 'Lieu naissance', key: 'lieu_naissance' },
+        col_nationalite: { label: 'Nationalité', key: 'nationalite' },
+        col_adresse: { label: 'Adresse', key: 'adresse' },
         col_telephone: { label: 'Téléphone', key: 'telephone' },
         col_email: { label: 'Email', key: 'email' },
-        col_age: { label: 'Âge', key: 'age' },
         col_niveau: { label: 'Niveau', key: 'niveau' },
         col_filiere: { label: 'Filière', key: 'filiere' },
         col_matricule: { label: 'Matricule', key: 'matricule' },
-        col_nationalite: { label: 'Nationalité', key: 'nationalite' },
-        col_adresse: { label: 'Adresse', key: 'adresse' }
+        col_taille: { label: 'Taille', key: 'taille' },
+        col_poids: { label: 'Poids', key: 'poids' },
+        col_couleur_preferee: { label: 'Couleur préférée', key: 'couleur_preferee' },
+        col_style_vestimentaire: { label: 'Style vestimentaire', key: 'style_vestimentaire' },
+        col_sport_prefere: { label: 'Sport préféré', key: 'sport_prefere' },
+        col_loisirs: { label: 'Loisirs', key: 'loisirs' },
+        col_langues: { label: 'Langues', key: 'langues' },
+        col_qualites: { label: 'Qualités', key: 'qualites' },
+        col_defauts: { label: 'Défauts', key: 'defauts' }
       };
 
       for (const [id, info] of Object.entries(colMap)) {

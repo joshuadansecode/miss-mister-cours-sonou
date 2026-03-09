@@ -2163,8 +2163,13 @@
       }
     }
 
-    /* Thèmes Catlyne */
+    /* Thèmes Catlyne - Changement complet du site */
     body.theme-rose {
+      --bg: #1A0D14;
+      --bg2: #2A1520;
+      --card: #3A1D2C;
+      --card2: #4A2538;
+      --border: rgba(255, 105, 180, .15);
       --green: #FF69B4;
       --green-d: #FF1493;
       --green-dim: #4A1828;
@@ -2172,9 +2177,17 @@
       --gold-l: #FFD700;
       --miss: #FF69B4;
       --mister: #FFD700;
+      --text: #FFE4F0;
+      --text2: #FFB6D9;
+      --text3: #8A5A6F;
     }
 
     body.theme-violet {
+      --bg: #0F0A1A;
+      --bg2: #1A1229;
+      --card: #251A38;
+      --card2: #302247;
+      --border: rgba(147, 112, 219, .15);
       --green: #9370DB;
       --green-d: #8A2BE2;
       --green-dim: #2D1B3D;
@@ -2182,9 +2195,17 @@
       --gold-l: #FFB6C1;
       --miss: #9370DB;
       --mister: #FFB6C1;
+      --text: #E8E0FF;
+      --text2: #C4B5E8;
+      --text3: #6B5A8A;
     }
 
     body.theme-bleu {
+      --bg: #0A1520;
+      --bg2: #12202E;
+      --card: #1A2D3D;
+      --card2: #22394C;
+      --border: rgba(135, 206, 235, .15);
       --green: #87CEEB;
       --green-d: #4682B4;
       --green-dim: #1A2D3D;
@@ -2192,6 +2213,9 @@
       --gold-l: #F5F5DC;
       --miss: #87CEEB;
       --mister: #F5F5DC;
+      --text: #E0F4FF;
+      --text2: #B8D9E8;
+      --text3: #5A7A8A;
     }
 
     .theme-selector {
@@ -2232,29 +2256,36 @@
       transform: translateY(-50%);
       width: 50px;
       height: 50px;
-      background: linear-gradient(135deg, #FF69B4, #FF1493);
+      background: linear-gradient(135deg, var(--green), var(--green-d));
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      cursor: pointer;
+      cursor: move;
       box-shadow: 0 4px 20px rgba(255, 105, 180, 0.4);
       z-index: 100;
       transition: all .3s;
       opacity: 0.7;
       border: 2px solid rgba(255, 255, 255, 0.3);
+      user-select: none;
     }
 
     .catlyne-float-btn:hover {
       opacity: 1;
       transform: translateY(-50%) scale(1.1);
-      box-shadow: 0 6px 30px rgba(255, 105, 180, 0.6);
+      box-shadow: 0 6px 30px var(--green);
     }
 
     .catlyne-float-btn.active {
       opacity: 1;
-      background: linear-gradient(135deg, #FF1493, #C71585);
+      background: linear-gradient(135deg, var(--green-d), var(--green));
+    }
+
+    .catlyne-float-btn.dragging {
+      cursor: grabbing;
+      transform: scale(1.15);
+      opacity: 1;
     }
 
     /* Panneau coulissant */
@@ -2491,7 +2522,7 @@
   </audio>
 
   <!-- Bouton flottant Mode Catlyne -->
-  <div class="catlyne-float-btn" id="catlyneFloatBtn" onclick="toggleCatlynePanel()">
+  <div class="catlyne-float-btn" id="catlyneFloatBtn" title="Déplacer ou cliquer pour ouvrir">
     💕
   </div>
 
@@ -3160,6 +3191,9 @@
       // Mettre à jour les icônes
       updateCatlyneUI();
 
+      // Initialiser le bouton déplaçable
+      initDraggableButton();
+
       // Démarrer l'animation si activée
       if (catlyneSettings.heartsEnabled && currentPage === 'admin') {
         setTimeout(() => showHeartsAnimation(), 500);
@@ -3197,6 +3231,98 @@
       document.getElementById('catlynePanel').classList.remove('open');
       document.getElementById('catlynePanelOverlay').classList.remove('show');
       document.getElementById('catlyneFloatBtn').classList.remove('active');
+    }
+
+    // Rendre le bouton flottant déplaçable
+    let isDragging = false;
+    let currentX, currentY, initialX, initialY;
+    let xOffset = 0, yOffset = 0;
+
+    function initDraggableButton() {
+      const btn = document.getElementById('catlyneFloatBtn');
+
+      // Charger la position sauvegardée
+      const savedPos = localStorage.getItem('catlyneBtnPos');
+      if (savedPos) {
+        const pos = JSON.parse(savedPos);
+        btn.style.right = 'auto';
+        btn.style.top = 'auto';
+        btn.style.left = pos.x + 'px';
+        btn.style.top = pos.y + 'px';
+        btn.style.transform = 'none';
+        xOffset = pos.x;
+        yOffset = pos.y;
+      }
+
+      btn.addEventListener('mousedown', dragStart);
+      btn.addEventListener('touchstart', dragStart);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('touchmove', drag);
+      document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('touchend', dragEnd);
+    }
+
+    function dragStart(e) {
+      const btn = document.getElementById('catlyneFloatBtn');
+
+      if (e.type === 'touchstart') {
+        initialX = e.touches[0].clientX - xOffset;
+        initialY = e.touches[0].clientY - yOffset;
+      } else {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+      }
+
+      if (e.target === btn) {
+        isDragging = true;
+        btn.classList.add('dragging');
+      }
+    }
+
+    function drag(e) {
+      if (isDragging) {
+        e.preventDefault();
+        const btn = document.getElementById('catlyneFloatBtn');
+
+        if (e.type === 'touchmove') {
+          currentX = e.touches[0].clientX - initialX;
+          currentY = e.touches[0].clientY - initialY;
+        } else {
+          currentX = e.clientX - initialX;
+          currentY = e.clientY - initialY;
+        }
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        // Limiter aux bords de l'écran
+        const maxX = window.innerWidth - 50;
+        const maxY = window.innerHeight - 50;
+        xOffset = Math.max(0, Math.min(xOffset, maxX));
+        yOffset = Math.max(0, Math.min(yOffset, maxY));
+
+        btn.style.right = 'auto';
+        btn.style.left = xOffset + 'px';
+        btn.style.top = yOffset + 'px';
+        btn.style.transform = 'none';
+      }
+    }
+
+    function dragEnd(e) {
+      if (isDragging) {
+        const btn = document.getElementById('catlyneFloatBtn');
+        isDragging = false;
+        btn.classList.remove('dragging');
+
+        // Sauvegarder la position
+        localStorage.setItem('catlyneBtnPos', JSON.stringify({ x: xOffset, y: yOffset }));
+
+        // Si on n'a pas bougé beaucoup, ouvrir le panneau
+        const moveDistance = Math.sqrt(Math.pow(currentX - xOffset, 2) + Math.pow(currentY - yOffset, 2));
+        if (moveDistance < 5) {
+          toggleCatlynePanel();
+        }
+      }
     }
 
     function toggleHearts() {

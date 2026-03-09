@@ -2082,10 +2082,494 @@
       font-size: 13px;
       font-style: italic;
     }
+
+    /* ══════════════ MODE CATLYNE 💕 ══════════════ */
+    .catlyne-hearts-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      overflow: hidden;
+      display: none;
+    }
+
+    .catlyne-hearts-overlay.active {
+      display: block;
+    }
+
+    .catlyne-welcome {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInOut 4s ease-in-out;
+      pointer-events: none;
+    }
+
+    .catlyne-welcome h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 48px;
+      color: #FF69B4;
+      text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .catlyne-welcome p {
+      font-size: 24px;
+      color: var(--text);
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 24px;
+      animation: fall linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes fall {
+      0% {
+        top: -10%;
+        opacity: 0.8;
+      }
+
+      100% {
+        top: 110%;
+        opacity: 0;
+      }
+    }
+
+    /* Thèmes Catlyne */
+    body.theme-rose {
+      --green: #FF69B4;
+      --green-d: #FF1493;
+      --gold: #FFD700;
+      --gold-l: #FFD700;
+    }
+
+    body.theme-violet {
+      --green: #9370DB;
+      --green-d: #8A2BE2;
+      --gold: #FFB6C1;
+      --gold-l: #FFB6C1;
+    }
+
+    body.theme-bleu {
+      --green: #87CEEB;
+      --green-d: #4682B4;
+      --gold: #F5F5DC;
+      --gold-l: #F5F5DC;
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .theme-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      transition: all .2s;
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+    }
+
+    .theme-btn.active {
+      border-color: var(--green);
+      background: rgba(61, 214, 140, .1);
+      color: var(--green);
+    }
+
+    .theme-btn:hover {
+      border-color: rgba(255, 255, 255, .2);
+    }
+
+    /* ══════════════ BOUTON FLOTTANT CATLYNE 💕 ══════════════ */
+    .catlyne-float-btn {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #FF69B4, #FF1493);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 105, 180, 0.4);
+      z-index: 100;
+      transition: all .3s;
+      opacity: 0.7;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .catlyne-float-btn:hover {
+      opacity: 1;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 30px rgba(255, 105, 180, 0.6);
+    }
+
+    .catlyne-float-btn.active {
+      opacity: 1;
+      background: linear-gradient(135deg, #FF1493, #C71585);
+    }
+
+    /* Panneau coulissant */
+    .catlyne-panel {
+      position: fixed;
+      right: -320px;
+      top: 0;
+      bottom: 0;
+      width: 320px;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+      z-index: 110;
+      transition: right .3s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .catlyne-panel.open {
+      right: 0;
+    }
+
+    .catlyne-panel-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(255, 20, 147, 0.05));
+    }
+
+    .catlyne-panel-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .catlyne-panel-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all .2s;
+    }
+
+    .catlyne-panel-close:hover {
+      background: rgba(255, 105, 180, 0.1);
+      border-color: #FF69B4;
+      color: #FF69B4;
+    }
+
+    .catlyne-panel-body {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .catlyne-section {
+      margin-bottom: 24px;
+    }
+
+    .catlyne-section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text3);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .catlyne-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .catlyne-toggle:hover {
+      border-color: rgba(255, 105, 180, 0.3);
+      background: rgba(255, 105, 180, 0.05);
+    }
+
+    .catlyne-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .catlyne-toggle-icon {
+      font-size: 20px;
+    }
+
+    .catlyne-toggle-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .catlyne-switch {
+      width: 48px;
+      height: 26px;
+      background: var(--border);
+      border-radius: 13px;
+      position: relative;
+      transition: background .3s;
+    }
+
+    .catlyne-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: var(--text3);
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: all .3s;
+    }
+
+    .catlyne-toggle.active .catlyne-switch {
+      background: linear-gradient(135deg, #FF69B4, #FF1493);
+    }
+
+    .catlyne-toggle.active .catlyne-switch::after {
+      left: 25px;
+      background: white;
+    }
+
+    .catlyne-themes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .catlyne-theme-btn {
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--bg2);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .catlyne-theme-btn:hover {
+      border-color: rgba(255, 255, 255, .2);
+      transform: translateY(-2px);
+    }
+
+    .catlyne-theme-btn.active {
+      border-color: #FF69B4;
+      background: rgba(255, 105, 180, 0.1);
+      color: #FF69B4;
+    }
+
+    .catlyne-theme-preview {
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+    }
+
+    .catlyne-theme-preview span {
+      flex: 1;
+      border-radius: 4px;
+    }
+
+    /* Overlay pour fermer le panneau */
+    .catlyne-panel-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 105;
+      backdrop-filter: blur(2px);
+    }
+
+    .catlyne-panel-overlay.show {
+      display: block;
+    }
+
+    @media(max-width: 900px) {
+      .catlyne-float-btn {
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+
+      .catlyne-panel {
+        width: 100%;
+        right: -100%;
+      }
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- ═══════════════════════════ MODE CATLYNE 💕 ═══ -->
+  <div class="catlyne-hearts-overlay" id="catlyneHearts"></div>
+  <div class="catlyne-welcome" id="catlyneWelcome">
+    <h2>Bienvenue Catlyne 💕</h2>
+    <p>Avec tout mon amour</p>
+  </div>
+
+  <!-- Audio pour la musique de fond -->
+  <audio id="catlyneMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a8f1b6e8e.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Bouton flottant Mode Catlyne -->
+  <div class="catlyne-float-btn" id="catlyneFloatBtn" onclick="toggleCatlynePanel()">
+    💕
+  </div>
+
+  <!-- Overlay pour fermer le panneau -->
+  <div class="catlyne-panel-overlay" id="catlynePanelOverlay" onclick="closeCatlynePanel()"></div>
+
+  <!-- Panneau coulissant Mode Catlyne -->
+  <div class="catlyne-panel" id="catlynePanel">
+    <div class="catlyne-panel-header">
+      <h3>💕 Mode Catlyne</h3>
+      <button class="catlyne-panel-close" onclick="closeCatlynePanel()">✕</button>
+    </div>
+    <div class="catlyne-panel-body">
+
+      <!-- Animation Cœurs -->
+      <div class="catlyne-section">
+        <div class="catlyne-section-title">Animation</div>
+        <div class="catlyne-toggle" id="toggleHearts" onclick="toggleHearts()">
+          <div class="catlyne-toggle-left">
+            <span class="catlyne-toggle-icon" id="iconHearts">🤍</span>
+            <span class="catlyne-toggle-label">Cœurs qui tombent</span>
+          </div>
+          <div class="catlyne-switch"></div>
+        </div>
+      </div>
+
+      <!-- Musique -->
+      <div class="catlyne-section">
+        <div class="catlyne-section-title">Ambiance</div>
+        <div class="catlyne-toggle" id="toggleMusic" onclick="toggleMusic()">
+          <div class="catlyne-toggle-left">
+            <span class="catlyne-toggle-icon" id="iconMusic">🔇</span>
+            <span class="catlyne-toggle-label">Musique romantique</span>
+          </div>
+          <div class="catlyne-switch"></div>
+        </div>
+      </div>
+
+      <!-- Thèmes -->
+      <div class="catlyne-section">
+        <div class="catlyne-section-title">Thème de couleurs</div>
+        <div class="catlyne-themes">
+          <button class="catlyne-theme-btn" id="themeDefault" onclick="setTheme('default')">
+            <div class="catlyne-theme-preview">
+              <span style="background: #3DD68C;"></span>
+              <span style="background: #0F1A14;"></span>
+            </div>
+            Défaut
+          </button>
+          <button class="catlyne-theme-btn" id="themeRose" onclick="setTheme('rose')">
+            <div class="catlyne-theme-preview">
+              <span style="background: #FF69B4;"></span>
+              <span style="background: #FFD700;"></span>
+            </div>
+            Rose 💕
+          </button>
+          <button class="catlyne-theme-btn" id="themeViolet" onclick="setTheme('violet')">
+            <div class="catlyne-theme-preview">
+              <span style="background: #9370DB;"></span>
+              <span style="background: #FFB6C1;"></span>
+            </div>
+            Violet 💜
+          </button>
+          <button class="catlyne-theme-btn" id="themeBleu" onclick="setTheme('bleu')">
+            <div class="catlyne-theme-preview">
+              <span style="background: #87CEEB;"></span>
+              <span style="background: #F5F5DC;"></span>
+            </div>
+            Bleu 💙
+          </button>
+        </div>
+      </div>
+
+      <!-- Message d'amour -->
+      <div class="catlyne-section">
+        <div
+          style="padding: 16px; background: rgba(255, 105, 180, 0.1); border-radius: 12px; border: 1px solid rgba(255, 105, 180, 0.2); text-align: center;">
+          <p style="font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0;">
+            Ce site a été créé avec amour pour toi, Catlyne 💕<br>
+            <span style="font-size: 11px; color: var(--text3);">— Joshua</span>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ═══════════════════════════ FORM PAGE ═══ -->
   <div class="page active" id="page-form">
@@ -2538,10 +3022,33 @@
           <input type="checkbox" id="col_date_signature" style="margin-right: 8px;">Date signature
         </label>
       </div>
+
+      <!-- Option d'orientation -->
+      <div style="padding: 15px 0 10px; border-top: 1px solid var(--border); margin-top: 10px;">
+        <label
+          style="font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; display: block; margin-bottom: 10px;">Orientation</label>
+        <div style="display: flex; gap: 10px;">
+          <label
+            style="flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; font-size: 12px; color: var(--text); transition: all 0.2s;"
+            id="orientPortraitLabel">
+            <input type="radio" name="orientation" id="orientPortrait" value="portrait" checked
+              style="margin-right: 5px;">
+            📄 Portrait
+          </label>
+          <label
+            style="flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; font-size: 12px; color: var(--text); transition: all 0.2s;"
+            id="orientLandscapeLabel">
+            <input type="radio" name="orientation" id="orientLandscape" value="landscape" style="margin-right: 5px;">
+            📃 Paysage
+          </label>
+        </div>
+      </div>
+
       <div class="cbtns">
         <button class="btn-can" onclick="closeTablePrintModal()">Annuler</button>
-        <button class="btn-del" style="background: var(--green); color: #0A1510; border-color: var(--green);"
-          onclick="printTableWithColumns()">📊 Imprimer</button>
+        <button class="btn-nv" onclick="previewTable()" style="flex: 1;">👁 Aperçu</button>
+        <button class="btn-del" style="background: var(--green); color: #0A1510; border-color: var(--green); flex: 1;"
+          onclick="printTableWithColumns()">🖨 Imprimer</button>
       </div>
     </div>
   </div>
@@ -2623,6 +3130,179 @@
     let concours_type = '', photoB64 = '';
     let allCandidats = [], filtered = [], curView = 'all', curCand = null;
 
+    // ══════════════════════════════════════════
+    //  💕 MODE CATLYNE
+    // ══════════════════════════════════════════
+    let catlyneSettings = {
+      heartsEnabled: localStorage.getItem('catlyneHearts') === 'true',
+      musicEnabled: localStorage.getItem('catlyneMusic') === 'true',
+      theme: localStorage.getItem('catlyneTheme') || 'default'
+    };
+
+    // Initialiser le Mode Catlyne au chargement
+    function initCatlyne() {
+      // Appliquer le thème sauvegardé
+      if (catlyneSettings.theme !== 'default') {
+        document.body.classList.add('theme-' + catlyneSettings.theme);
+        document.getElementById('theme' + catlyneSettings.theme.charAt(0).toUpperCase() + catlyneSettings.theme.slice(1)).classList.add('active');
+      } else {
+        document.getElementById('themeDefault').classList.add('active');
+      }
+
+      // Mettre à jour les icônes
+      updateCatlyneUI();
+
+      // Démarrer l'animation si activée
+      if (catlyneSettings.heartsEnabled && currentPage === 'admin') {
+        setTimeout(() => showHeartsAnimation(), 500);
+      }
+    }
+
+    function updateCatlyneUI() {
+      document.getElementById('iconHearts').textContent = catlyneSettings.heartsEnabled ? '💕' : '🤍';
+      document.getElementById('iconMusic').textContent = catlyneSettings.musicEnabled ? '🔊' : '🔇';
+
+      if (catlyneSettings.heartsEnabled) {
+        document.getElementById('toggleHearts').classList.add('active');
+      } else {
+        document.getElementById('toggleHearts').classList.remove('active');
+      }
+
+      if (catlyneSettings.musicEnabled) {
+        document.getElementById('toggleMusic').classList.add('active');
+      } else {
+        document.getElementById('toggleMusic').classList.remove('active');
+      }
+    }
+
+    function toggleCatlynePanel() {
+      const panel = document.getElementById('catlynePanel');
+      const overlay = document.getElementById('catlynePanelOverlay');
+      const btn = document.getElementById('catlyneFloatBtn');
+
+      panel.classList.toggle('open');
+      overlay.classList.toggle('show');
+      btn.classList.toggle('active');
+    }
+
+    function closeCatlynePanel() {
+      document.getElementById('catlynePanel').classList.remove('open');
+      document.getElementById('catlynePanelOverlay').classList.remove('show');
+      document.getElementById('catlyneFloatBtn').classList.remove('active');
+    }
+
+    function toggleHearts() {
+      catlyneSettings.heartsEnabled = !catlyneSettings.heartsEnabled;
+      localStorage.setItem('catlyneHearts', catlyneSettings.heartsEnabled);
+      updateCatlyneUI();
+
+      if (catlyneSettings.heartsEnabled) {
+        showHeartsAnimation();
+        toast('💕 Animation activée');
+      } else {
+        hideHeartsAnimation();
+        toast('🤍 Animation désactivée');
+      }
+    }
+
+    function toggleMusic() {
+      catlyneSettings.musicEnabled = !catlyneSettings.musicEnabled;
+      localStorage.setItem('catlyneMusic', catlyneSettings.musicEnabled);
+      updateCatlyneUI();
+
+      const audio = document.getElementById('catlyneMusic');
+      if (catlyneSettings.musicEnabled) {
+        audio.play().catch(e => {
+          toast('⚠️ Cliquez sur la page pour activer la musique');
+        });
+        toast('🔊 Musique activée');
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        toast('🔇 Musique désactivée');
+      }
+    }
+
+    function setTheme(theme) {
+      // Retirer tous les thèmes
+      document.body.classList.remove('theme-rose', 'theme-violet', 'theme-bleu');
+      document.querySelectorAll('.catlyne-theme-btn').forEach(btn => btn.classList.remove('active'));
+
+      // Appliquer le nouveau thème
+      if (theme !== 'default') {
+        document.body.classList.add('theme-' + theme);
+      }
+
+      document.getElementById('theme' + theme.charAt(0).toUpperCase() + theme.slice(1)).classList.add('active');
+
+      catlyneSettings.theme = theme;
+      localStorage.setItem('catlyneTheme', theme);
+
+      const themeNames = {
+        'default': 'Thème par défaut',
+        'rose': 'Rose romantique 💕',
+        'violet': 'Violet doux 💜',
+        'bleu': 'Bleu ciel 💙'
+      };
+      toast('✨ ' + themeNames[theme]);
+    }
+
+    function showHeartsAnimation() {
+      const overlay = document.getElementById('catlyneHearts');
+      const welcome = document.getElementById('catlyneWelcome');
+
+      overlay.classList.add('active');
+      welcome.style.display = 'block';
+
+      // Créer 30 cœurs
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => createHeart(), i * 100);
+      }
+
+      // Jouer la musique si activée
+      if (catlyneSettings.musicEnabled) {
+        const audio = document.getElementById('catlyneMusic');
+        audio.play().catch(e => console.log('Audio autoplay bloqué'));
+      }
+
+      // Cacher le message après 4 secondes
+      setTimeout(() => {
+        welcome.style.display = 'none';
+      }, 4000);
+
+      // Arrêter l'animation après 10 secondes
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.innerHTML = '';
+      }, 10000);
+    }
+
+    function hideHeartsAnimation() {
+      const overlay = document.getElementById('catlyneHearts');
+      const welcome = document.getElementById('catlyneWelcome');
+      overlay.classList.remove('active');
+      overlay.innerHTML = '';
+      welcome.style.display = 'none';
+
+      const audio = document.getElementById('catlyneMusic');
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    function createHeart() {
+      const overlay = document.getElementById('catlyneHearts');
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.textContent = ['💕', '💖', '💗', '💓', '💝'][Math.floor(Math.random() * 5)];
+      heart.style.left = Math.random() * 100 + '%';
+      heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+      heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+      heart.style.animationDelay = Math.random() * 2 + 's';
+      overlay.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 8000);
+    }
+
     // ══ NAVIGATION ══
     let currentPage = 'form';
 
@@ -2632,7 +3312,13 @@
       document.querySelectorAll('.app-nav button').forEach(x => x.classList.remove('active'));
       document.getElementById('page-' + p).classList.add('active');
       document.getElementById('nav-' + p).classList.add('active');
-      if (p === 'admin') loadCandidats();
+      if (p === 'admin') {
+        loadCandidats();
+        // Déclencher l'animation Catlyne si activée
+        if (catlyneSettings.heartsEnabled) {
+          setTimeout(() => showHeartsAnimation(), 500);
+        }
+      }
 
       // Ajouter à l'historique
       history.pushState({ page: p }, '', '#' + p);
@@ -3275,9 +3961,9 @@
             body { font-family: Arial, sans-serif; padding: 20px; }
             h1 { text-align: center; color: #0F1A14; margin-bottom: 10px; }
             h2 { text-align: center; color: #3DD68C; font-size: 14px; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
             th { background-color: #0F1A14; color: #3DD68C; padding: 10px; text-align: left; font-size: 12px; border: 1px solid #ddd; }
-            td { padding: 8px; border: 1px solid #ddd; font-size: 11px; }
+            td { padding: 8px; border: 1px solid #ddd; font-size: 11px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; word-wrap: break-word; vertical-align: top; }
             tr:nth-child(even) { background-color: #f9f9f9; }
             .miss { color: #E06090; font-weight: bold; }
             .mister { color: #5090E0; font-weight: bold; }
@@ -3341,6 +4027,11 @@
       toast(`✅ Tableau prêt à imprimer — ${candidatsToShow.length} candidat(s)`);
     }
 
+    // Fonction d'aperçu
+    function previewTable() {
+      printTableWithColumns();
+    }
+
     // Auto date
     const nd = new Date();
     document.getElementById('sig_j').value = String(nd.getDate()).padStart(2, '0');
@@ -3364,6 +4055,9 @@
 
     // Initialiser l'historique
     history.replaceState({ page: 'form' }, '', '#form');
+
+    // Initialiser le Mode Catlyne
+    initCatlyne();
   </script>
 </body>
 
